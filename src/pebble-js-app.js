@@ -1,6 +1,7 @@
 
 function fetchVenues(latitude, longitude) {
   var req = new XMLHttpRequest();
+  // Este comentario es nuevo
   req.open('GET', 'http://baasbox-soukron.rhcloud.com:8000/plugin/venues.fs.search?ll=' + latitude + ',' + longitude + '&X-BB-SESSION=1b24b1a8-a72f-4e15-a382-36c4282a9c2c', true);
 //	req.open('GET', 'http://api.openweathermap.org/data/2.5/weather?' + 'lat=' + latitude + '&lon=' + longitude + '&cnt=1', true);
   req.onload = function () {
