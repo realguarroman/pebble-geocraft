@@ -1,0 +1,35 @@
+{
+    "appKeys": {
+        "VENUE_NAME_0": 0,
+        "VENUE_NAME_1": 1,
+        "VENUE_NAME_2": 2,
+        "response_data": 4,
+        "response_type": 3
+    },
+    "capabilities": [
+        "location"
+    ],
+    "companyName": "Pebble",
+    "longName": "geocraft",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/music_icon_ellipsis.png",
+                "name": "ELLIPSIS",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "geocraft",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "0EF3F895-1E14-4EA2-B5D0-38951F3686C2",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
