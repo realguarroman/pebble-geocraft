@@ -31,7 +31,7 @@ function fetchVenues(latitude, longitude) {
 function fetchVenuestest(latitude, longitude) {
 Pebble.sendAppMessage({
 	'DATA_TYPE': 'venues',
-	'DATA_LENGTH': '4',
+	'DATA_LENGTH': 5,
 	'ITEM_1_ID': '4b7339f8f964a52006a32de3',
 	'ITEM_1_NAME': 'Paiporta',
 	'ITEM_2_ID': '4c38c73893db0f4788392292',
@@ -39,7 +39,9 @@ Pebble.sendAppMessage({
 	'ITEM_3_ID': '4e2dea85b0fbdc2b64f23f3b',
 	'ITEM_3_NAME': 'PLAZA MAYOR',
 	'ITEM_4_ID': '4f40f809e4b028f640a5a1c1',
-	'ITEM_4_NAME': 'AMANECER'
+	'ITEM_4_NAME': 'AMANECER',
+	'ITEM_5_ID': '4f40f809e4b0287640a5a1c1',
+	'ITEM_5_NAME': 'JARL'
 });
 }
 
@@ -71,7 +73,7 @@ Pebble.addEventListener('ready', function (e) {
 });
 
 Pebble.addEventListener('appmessage', function (e) {
-  if (e.payload.FETCH_TYPE == 1) window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+  if (e.payload.FETCH_TYPE == 0) window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
 	console.log(JSON.stringify(e.payload));
   console.log(e.payload.FETCH_TYPE);
   console.log('message!');

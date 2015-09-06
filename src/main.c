@@ -211,58 +211,24 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 {
     
 	
-		s_root_level = action_menu_level_create(LEVEL_1_ITEMS);
-  //	s_custom_level = action_menu_level_create(LEVEL_2_ITEMS);
-
-  // Set up the actions for this level, using action context to pass types
   
 	
 	
 		(void) context;
     //Get data
-    Tuple *t = dict_read_first(iter);
-    while(t != NULL)
-    {		
-			
-		//	process_tuple(t);      
-      //Get next
-			
-			int key = t->key;
-			switch(key) {
-				case ITEM_1_NAME:
-					{
-						action_menu_level_add_action(s_root_level, t->value->cstring, action_performed_callback, 
+	
+  	Tuple *length_tuple = dict_find(iter,DATA_LENGTH);
+		//APP_LOG(APP_LOG_LEVEL_ERROR, length_tuple->value->int32);
+		int length = length_tuple->value->int32;
+	  s_root_level = action_menu_level_create(length);
+	
+		for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
+			Tuple *venue_tuple = dict_find(iter,i + 10);
+			action_menu_level_add_action(s_root_level, venue_tuple->value->cstring, action_performed_callback, 
                                &(Context){.type=VibrationTypeShort});
-					}
-				break;
-				case ITEM_2_NAME:
-					{
-						action_menu_level_add_action(s_root_level, t->value->cstring, action_performed_callback, 
-                               &(Context){.type=VibrationTypeLong});
-					}
-				break;
-				case ITEM_3_NAME:
-					{
-						action_menu_level_add_action(s_root_level, t->value->cstring, action_performed_callback, 
-                               &(Context){.type=VibrationTypeDouble});
-					}
-				break;
-				case ITEM_4_NAME:
-					{
-						action_menu_level_add_action(s_root_level, t->value->cstring, action_performed_callback, 
-                               &(Context){.type=VibrationTypeCustomLong});
-					}
-				break;
-				
-			}
-				
-			
-			
-			
-      t = dict_read_next(iter);
-			
-			
-    }
+		}
+	
+
 	  // Configure the ActionMenu Window about to be shown
   ActionMenuConfig config = (ActionMenuConfig) {
     .root_level = s_root_level,
