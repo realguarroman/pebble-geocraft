@@ -1,12 +1,35 @@
 #include <pebble.h>
 #include "action_menu.h"
 
-#define LEVEL_1_ITEMS 3
+#define LEVEL_1_ITEMS 4
 //#define LEVEL_2_ITEMS 3
+
 	
-#define VENUE_NAME_0	0
-#define VENUE_NAME_1  1
-#define VENUE_NAME_2	2
+	
+#define DATA_TYPE			100
+#define DATA_LENGTH		101
+#define FETCH_TYPE		200
+#define	ITEM_1_ID			1
+#define	ITEM_1_NAME		11
+#define	ITEM_2_ID			2
+#define	ITEM_2_NAME		12
+#define	ITEM_3_ID			3
+#define	ITEM_3_NAME		13
+#define	ITEM_4_ID			4
+#define	ITEM_4_NAME		14
+#define	ITEM_5_ID			5
+#define	ITEM_5_NAME		15
+#define	ITEM_6_ID			6
+#define	ITEM_6_NAME		16
+#define	ITEM_7_ID			7
+#define	ITEM_7_NAME		17
+#define	ITEM_8_ID			8
+#define	ITEM_8_NAME		18
+#define	ITEM_9_ID			9
+#define	ITEM_9_NAME		19
+#define	ITEM_10_ID		10
+#define	ITEM_10_NAME	20
+
 
 typedef struct {
   int type;
@@ -112,7 +135,7 @@ static void request_venues(void) {
 		DictionaryIterator *iter;
 		app_message_outbox_begin(&iter);
 		// Add a key-value pair
-		dict_write_uint8(iter, 0, 0);
+		dict_write_uint8(iter, FETCH_TYPE, 0); // 0 es el tipo "venue"
 		// Send the message!
 		app_message_outbox_send();
 	//	APP_LOG(APP_LOG_LEVEL_DEBUG, "Temperatura solicitada"); 
@@ -206,22 +229,28 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			
 			int key = t->key;
 			switch(key) {
-				case VENUE_NAME_0:
+				case ITEM_1_NAME:
 					{
 						action_menu_level_add_action(s_root_level, t->value->cstring, action_performed_callback, 
                                &(Context){.type=VibrationTypeShort});
 					}
 				break;
-				case VENUE_NAME_1:
+				case ITEM_2_NAME:
 					{
 						action_menu_level_add_action(s_root_level, t->value->cstring, action_performed_callback, 
                                &(Context){.type=VibrationTypeLong});
 					}
 				break;
-				case VENUE_NAME_2:
+				case ITEM_3_NAME:
 					{
 						action_menu_level_add_action(s_root_level, t->value->cstring, action_performed_callback, 
                                &(Context){.type=VibrationTypeDouble});
+					}
+				break;
+				case ITEM_4_NAME:
+					{
+						action_menu_level_add_action(s_root_level, t->value->cstring, action_performed_callback, 
+                               &(Context){.type=VibrationTypeCustomLong});
 					}
 				break;
 				

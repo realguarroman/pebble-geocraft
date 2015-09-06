@@ -1,10 +1,28 @@
 {
     "appKeys": {
-        "VENUE_NAME_0": 0,
-        "VENUE_NAME_1": 1,
-        "VENUE_NAME_2": 2,
-        "response_data": 4,
-        "response_type": 3
+        "DATA_LENGTH": 101,
+        "DATA_TYPE": 100,
+        "FETCH_TYPE": 200,
+        "ITEM_10_ID": 10,
+        "ITEM_10_NAME": 20,
+        "ITEM_1_ID": 1,
+        "ITEM_1_NAME": 11,
+        "ITEM_2_ID": 2,
+        "ITEM_2_NAME": 12,
+        "ITEM_3_ID": 3,
+        "ITEM_3_NAME": 13,
+        "ITEM_4_ID": 4,
+        "ITEM_4_NAME": 14,
+        "ITEM_5_ID": 5,
+        "ITEM_5_NAME": 15,
+        "ITEM_6_ID": 6,
+        "ITEM_6_NAME": 16,
+        "ITEM_7_ID": 7,
+        "ITEM_7_NAME": 17,
+        "ITEM_8_ID": 8,
+        "ITEM_8_NAME": 18,
+        "ITEM_9_ID": 9,
+        "ITEM_9_NAME": 19
     },
     "capabilities": [
         "location"
