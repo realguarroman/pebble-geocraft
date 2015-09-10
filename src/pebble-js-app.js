@@ -63,22 +63,47 @@ var locationOptions = {
   'maximumAge': 60000
 };
 
-Pebble.addEventListener('ready', function (e) {
-  console.log('connect!' + e.ready);
- // window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError,
- //   locationOptions);
-  console.log(e.type);
-	console.log('Pebble Watch Token: ' + Pebble.getWatchToken());
-	console.log('Pebble Account Token: ' + Pebble.getAccountToken());
-});
+
+
+
+
+// Called when JS is ready
+Pebble.addEventListener("ready",
+												function(e) {
+													console.log("JS is ready");
+
+													var http = new XMLHttpRequest();
+													var params = '{ "username": "' + Pebble.getAccountToken() + '", "password": "' + Pebble.getWatchToken() + '", "appcode": "1234567890" }';
+													http.open("POST", "http://baasbox-soukron.rhcloud.com:8000/login", true);
+
+													//Send the proper header information along with the request
+													http.setRequestHeader("Content-type", "application/json");
+													http.setRequestHeader("Connection", "close");
+
+													//Call a function when the state changes
+													http.onload = function() {
+														if(http.readyState == 4 && http.status == 200) {
+														//	console.log(http.responseText);
+															var response = JSON.parse(http.responseText);
+															console.log('X-BB-SESSION -> ' + response.data["X-BB-SESSION"]);
+															
+														}
+														else {
+															console.log("Ha habido algun error");
+															console.log(http.responseText);
+														}
+													};
+
+													http.send(params);
+												});
+
+
 
 Pebble.addEventListener('appmessage', function (e) {
   if (e.payload.FETCH_TYPE == 0) window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
 	console.log(JSON.stringify(e.payload));
   console.log(e.payload.FETCH_TYPE);
   console.log('message!');
-	
-	
 	
 });
 

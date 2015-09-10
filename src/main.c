@@ -340,7 +340,7 @@ static void main_select_click_handler(ClickRecognizerRef recognizer, void *conte
 
   // Show the ActionMenu
 	s_main_action_menu = action_menu_open(&main_action_menu_config);
-	action_menu_freeze(s_main_action_menu);
+	action_menu_freeze(s_main_action_menu); //no me gusta esto
 }
 
 static void main_click_config_provider(void *context) {
