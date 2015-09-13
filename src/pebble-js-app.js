@@ -28,9 +28,9 @@ function fetchVenues(latitude, longitude) {
 }
 
 
-function fetchVenuestest(latitude, longitude) {
+function fetchVenuesTest(latitude, longitude) {
 Pebble.sendAppMessage({
-	'DATA_TYPE': 'venues',
+	'DATA_TYPE': 0, //venues
 	'DATA_LENGTH': 5,
 	'ITEM_1_ID': '4b7339f8f964a52006a32de3',
 	'ITEM_1_NAME': 'Paiporta',
@@ -43,11 +43,28 @@ Pebble.sendAppMessage({
 	'ITEM_5_ID': '4f40f809e4b0287640a5a1c1',
 	'ITEM_5_NAME': 'JARL'
 });
+console.log("Venues enviadas al Pebble");
 }
+
+
+function fetchItemsTest(venue_id) {
+Pebble.sendAppMessage({	
+	'DATA_TYPE': 1, //items
+	'DATA_LENGTH': 2,
+	'ITEM_1_ID': '4b7339f8f964a52006a32',
+	'ITEM_1_NAME': 'Llave de oro',
+	'ITEM_2_ID': '473893db0f4788392292',
+	'ITEM_2_NAME': '10 Monedas',
+});
+console.log("Ítems enviados al Pebble");
+}
+
+
+
 
 function locationSuccess(pos) {
   var coordinates = pos.coords;
-  fetchVenuestest(coordinates.latitude, coordinates.longitude);
+  fetchVenuesTest(coordinates.latitude, coordinates.longitude);
 }
 
 function locationError(err) {
@@ -83,10 +100,10 @@ Pebble.addEventListener("ready",
 													//Call a function when the state changes
 													http.onload = function() {
 														if(http.readyState == 4 && http.status == 200) {
-														//	console.log(http.responseText);
+															//	console.log(http.responseText);
 															var response = JSON.parse(http.responseText);
 															console.log('X-BB-SESSION -> ' + response.data["X-BB-SESSION"]);
-															
+
 														}
 														else {
 															console.log("Ha habido algun error");
@@ -100,10 +117,15 @@ Pebble.addEventListener("ready",
 
 
 Pebble.addEventListener('appmessage', function (e) {
-  if (e.payload.FETCH_TYPE == 0) window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
-	console.log(JSON.stringify(e.payload));
+  //Fetch venues
+	if (e.payload.FETCH_TYPE == 0) window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+	//Fetch items from venues
+	if (e.payload.FETCH_TYPE == 1)  fetchItemsTest(999);
+	
+	
+//	console.log(JSON.stringify(e.payload));
   console.log(e.payload.FETCH_TYPE);
-  console.log('message!');
+//  console.log('message!');
 	
 });
 

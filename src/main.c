@@ -32,6 +32,9 @@
 // Types of actions
 typedef enum {
   ActionTypeEmpty,
+	ActionTypeFetchVenues,
+	ActionTypeFetchItems,
+	ActionTypeShowInventory,
   ActionTypeEnterVenue,
   ActionTypeEnterItem,
   ActionTypeGetItem,
@@ -75,6 +78,30 @@ static Context *s_item_action_data;
 
 // Other variables
 static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap;
+
+/****************************** Request Data to JS ****************************************/
+
+static void request_venues(void) {
+		//vibes_short_pulse();
+		DictionaryIterator *iter;
+		app_message_outbox_begin(&iter);
+		// Add a key-value pair
+		dict_write_uint8(iter, FETCH_TYPE, 0); // 0 es buscar Venues
+		// Send the message!
+		app_message_outbox_send();
+		APP_LOG(APP_LOG_LEVEL_INFO, "Venues solicitadas"); 
+}
+
+static void request_items(char* id_venue) {
+		//vibes_short_pulse();
+		DictionaryIterator *iter;
+		app_message_outbox_begin(&iter);
+		// Add a key-value pair
+		dict_write_uint8(iter, FETCH_TYPE, 1); // 1 es buscar ítems
+		// Send the message!
+		app_message_outbox_send();
+		APP_LOG(APP_LOG_LEVEL_INFO, "Ítems solicitados"); 
+}
 
 /****************************** Item  ActionMenu *****************************/
 
@@ -152,45 +179,30 @@ static void item_window_unload(Window *window) {
 
 static void venue_action_performed_callback(ActionMenu *action_menu, const ActionMenuItem *action, void *context) {
   // Get data from performed action
-  s_venue_action_data = action_menu_item_get_action_data(action);
-
+  vibes_short_pulse();
+	s_venue_action_data = action_menu_item_get_action_data(action);
+	//tengo problemas con los campos que vienen en Context, me salen cosas raras, voy a seguir como si recibiera bien la informacion
+	
   APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_venue_action_data->type, s_venue_action_data->id, s_venue_action_data->name);
-  switch(s_venue_action_data->type) {
-    case ActionTypeGetItem:
-    break;
-  case ActionTypeDropItem:
-    break;
-  default:
-    break;
-  }
+ 
+	
+	//voy a pedir los items con un id de venue a piñón pues no soy capaz de extraerlo
+	
+	request_items("4c38c73893db0f4788392292");
+	action_menu_freeze(s_venue_action_menu); 
+	
+	//switch(s_venue_action_data->type) {
+  //  case ActionTypeGetItem:
+  //  break;
+  //case ActionTypeDropItem:
+  //  break;
+  //default:
+  //  break;
+ // }
 
 }
 
-static void init_venue_action_menu() {
-  // Create the root level
-  s_venue_root_level = action_menu_level_create(2);
-  
-  // Get Items from remote API
-  
-  // Create both child levels for inventory and venues
-  s_venue_inventory_level = action_menu_level_create(2);
-  s_venue_items_level = action_menu_level_create(2);
-  
-  // Add items entries to be get
-  action_menu_level_add_child(s_venue_root_level, s_venue_items_level, "Coger objeto");
-  action_menu_level_add_action(s_venue_items_level, "10 Monedas", venue_action_performed_callback, 
-                               &(Context){.type=ActionTypeGetItem,.id="0001",.name="10 Monedas"});
-  action_menu_level_add_action(s_venue_items_level, "Cofre", venue_action_performed_callback, 
-                               &(Context){.type=ActionTypeGetItem,.id="0003",.name="Cofre"});
 
-  // Add inventory entries to be dropped
-  action_menu_level_add_child(s_venue_root_level, s_venue_inventory_level, "Dejar objeto");
-  action_menu_level_add_action(s_venue_inventory_level, "Dinero", venue_action_performed_callback, 
-                               &(Context){.type=ActionTypeDropItem,.id="0001",.name="Dinero"});
-  action_menu_level_add_action(s_venue_inventory_level, "Llave", venue_action_performed_callback, 
-                               &(Context){.type=ActionTypeDropItem,.id="0002",.name="Llave"});
-
-}
 
 /******************************** Venue  Clicks ********************************/
 
@@ -248,18 +260,6 @@ static void venue_window_unload(Window *window) {
 }
 
 
-/****************************** Request Data to JS ****************************************/
-
-static void request_venues(void) {
-		//vibes_short_pulse();
-		DictionaryIterator *iter;
-		app_message_outbox_begin(&iter);
-		// Add a key-value pair
-		dict_write_uint8(iter, FETCH_TYPE, 0); // 0 es el tipo "venue"
-		// Send the message!
-		app_message_outbox_send();
-		APP_LOG(APP_LOG_LEVEL_INFO, "Venues solicitadas"); 
-}
 
 
 
@@ -270,8 +270,19 @@ static void main_action_performed_callback(ActionMenu *action_menu, const Action
   // Get data from performed action
   s_main_action_data = action_menu_item_get_action_data(action);
   APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_main_action_data->type, s_main_action_data->id, s_main_action_data->name);
-
   switch (s_main_action_data->type) {
+		
+		 case ActionTypeFetchVenues: 
+      request_venues();
+			action_menu_freeze(s_main_action_menu); 
+      break;
+		
+		
+		 case ActionTypeFetchItems: 
+     // request_items(s_main_action_data->id);
+		//	action_menu_freeze(s_venue_action_menu); 
+      break;
+		
     case ActionTypeEnterVenue: 
       APP_LOG(APP_LOG_LEVEL_INFO, "Accediendo a la venue %s (id => %s)", s_main_action_data->name, s_main_action_data->id);
       action_menu_freeze(s_main_action_menu);
@@ -295,33 +306,20 @@ static void init_main_action_menu() {
   // Create the root level
   s_main_root_level = action_menu_level_create(2);
   
-  // Get Inventory/Venues from remote API
   
+	action_menu_level_add_action (s_main_root_level, "Búsqueda", main_action_performed_callback,
+															  &(Context){.type=ActionTypeFetchVenues});
+	action_menu_level_add_action (s_main_root_level, "Inventario", main_action_performed_callback,
+															  &(Context){.type=ActionTypeShowInventory});
 	
-  // Create both child levels for inventory and venues
-  s_main_inventory_level = action_menu_level_create(1);
-  s_main_venues_level = action_menu_level_create(10);
-  
-  // Add venues entries
-  action_menu_level_add_child(s_main_root_level, s_main_venues_level, "Búsqueda");
-//  action_menu_level_add_action(s_main_venues_level, "StarBucks Coffee", main_action_performed_callback, 
-//                               &(Context){.type=ActionTypeEnterVenue,.id="0001",.name="StarBucks Coffee"});
-//  action_menu_level_add_action(s_main_venues_level, "Bar Tolo", main_action_performed_callback, 
-//                               &(Context){.type=ActionTypeEnterVenue,.id="0002",.name="Bar Tolo"});
-
-  // Add inventory entries
-  action_menu_level_add_child(s_main_root_level, s_main_inventory_level, "Inventario");
-  action_menu_level_add_action(s_main_inventory_level, "Dinero", main_action_performed_callback, 
-                               &(Context){.type=ActionTypeEnterItem,.id="0001",.name="Dinero"});
-  action_menu_level_add_action(s_main_inventory_level, "Llave", main_action_performed_callback, 
-                               &(Context){.type=ActionTypeEnterItem,.id="0002",.name="Llave"});
-	//action_menu_freeze(s_main_action_menu);
+	
+ 
 }
 
 /********************************* Main Clicks *********************************/
 
 static void main_select_click_handler(ClickRecognizerRef recognizer, void *context) {
-	request_venues();
+	//request_venues();
 	
   // Configure the ActionMenu Window about to be shown
   ActionMenuConfig main_action_menu_config = (ActionMenuConfig) {
@@ -340,7 +338,7 @@ static void main_select_click_handler(ClickRecognizerRef recognizer, void *conte
 
   // Show the ActionMenu
 	s_main_action_menu = action_menu_open(&main_action_menu_config);
-	action_menu_freeze(s_main_action_menu); //no me gusta esto
+//	action_menu_freeze(s_main_action_menu); //no me gusta esto
 }
 
 static void main_click_config_provider(void *context) {
@@ -384,25 +382,84 @@ static void main_window_unload(Window *window) {
 
 static void in_received_handler(DictionaryIterator *iter, void *context) 
 {
-	vibes_short_pulse();
-	APP_LOG(APP_LOG_LEVEL_INFO, "Received handler"); 
-//	(void) context;
-   //Get data
-	Tuple *length_tuple = dict_find(iter,DATA_LENGTH);
-	//APP_LOG(APP_LOG_LEVEL_ERROR, length_tuple->value->int32);
-	int length = length_tuple->value->int32;
-//	s_root_level = action_menu_level_create(length);
 	
-	for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
-		Tuple *venue_tuple = dict_find(iter,i + 10);		
-		Tuple *id_tuple = dict_find(iter,i);	
-		action_menu_level_add_action(s_main_venues_level, venue_tuple->value->cstring, main_action_performed_callback, 
-                               &(Context){.type=ActionTypeEnterVenue,.id=id_tuple->value->cstring,.name=venue_tuple->value->cstring});
+	
+	APP_LOG(APP_LOG_LEVEL_INFO, "Received handler"); 
+	
+	
 
+	
+	
+	Tuple *length_tuple = dict_find(iter,DATA_LENGTH);
+	int length = length_tuple->value->int32;
+	Tuple *type_tuple = dict_find(iter,DATA_TYPE);
+	
+	//APP_LOG(APP_LOG_LEVEL_INFO, "Tipo de datos recibidos: %d", type_tuple->value->int32); 
+
+	switch (type_tuple->value->int32) {
+		
+		case 0:    		
+			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidas las venues en el Pebble"); 
+	  	//s_venue_root_level = action_menu_level_create(length);
+			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
+			Tuple *id_venue_tuple = dict_find(iter,i);
+			Tuple *venue_tuple = dict_find(iter,i + 10);		
+			action_menu_level_add_action(s_venue_root_level, venue_tuple->value->cstring, venue_action_performed_callback, 
+																&(Context){ .type=ActionTypeFetchItems,.id=id_venue_tuple->value->cstring,.name=venue_tuple->value->cstring});
+			}
+
+			ActionMenuConfig venue_action_menu_config = (ActionMenuConfig) {
+				.root_level = s_venue_root_level,
+				.colors = {
+					#ifdef PBL_COLOR
+					.background = GColorCyan,
+					.foreground = GColorBlack,
+					#else
+					.background = GColorWhite,
+					.foreground = GColorBlack,
+					#endif
+				},
+				.align = ActionMenuAlignCenter
+			};
+			action_menu_unfreeze(s_main_action_menu);
+			// Show the ActionMenu
+			s_venue_action_menu = action_menu_open(&venue_action_menu_config);
+		break;
 		
 		
-	}
-	action_menu_unfreeze(s_main_action_menu);
+		case 1:    	
+		APP_LOG(APP_LOG_LEVEL_INFO, "Recibidos los items en el Pebble"); 
+		s_item_root_level = action_menu_level_create(length);
+		for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
+			Tuple *id_item_tuple = dict_find(iter,i);
+			Tuple *item_tuple = dict_find(iter,i + 10);		
+  		action_menu_level_add_action(s_item_root_level, item_tuple->value->cstring, item_action_performed_callback, 
+																	 &(Context){ .type=ActionTypeFetchItems,.id=id_item_tuple->value->cstring,.name=item_tuple->value->cstring});
+		}
+
+		ActionMenuConfig item_action_menu_config = (ActionMenuConfig) {
+			.root_level = s_item_root_level,
+			.colors = {
+				#ifdef PBL_COLOR
+					.background = GColorGreen,
+				.foreground = GColorBlack,
+				#else
+					.background = GColorWhite,
+				.foreground = GColorBlack,
+				#endif
+			},
+				.align = ActionMenuAlignCenter
+		};
+		action_menu_unfreeze(s_venue_action_menu);
+		// Show the ActionMenu
+		s_item_action_menu = action_menu_open(&item_action_menu_config);
+		break;
+		
+	
+  }
+
+	
+	
 	
 }
 
@@ -469,8 +526,9 @@ static void init() {
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
     
   init_main_action_menu();
-  init_venue_action_menu();
-  init_item_action_menu();
+	s_venue_root_level = action_menu_level_create(10);
+ // init_venue_action_menu();
+ // init_item_action_menu();
 }
 
 static void deinit() {
