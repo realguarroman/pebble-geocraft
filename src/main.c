@@ -49,6 +49,7 @@ typedef struct {
   char* name;
 } Context;
 
+
 // Main window variables
 static Window *s_main_window;
 static TextLayer *s_main_label_layer;
@@ -77,7 +78,8 @@ static ActionMenuLevel *s_item_root_level, *s_item_inventory_level, *s_item_item
 static Context *s_item_action_data;
 
 // Other variables
-static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap;
+static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap;
+static BitmapLayer *s_logoFSQ_layer;
 
 /****************************** Request Data to JS ****************************************/
 
@@ -180,10 +182,14 @@ static void item_window_unload(Window *window) {
 static void venue_action_performed_callback(ActionMenu *action_menu, const ActionMenuItem *action, void *context) {
   // Get data from performed action
   vibes_short_pulse();
-	s_venue_action_data = action_menu_item_get_action_data(action);
+	
+	Context *caca;
+	
+ 	caca = action_menu_item_get_action_data(action);
+	APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d", caca->type);
 	//tengo problemas con los campos que vienen en Context, me salen cosas raras, voy a seguir como si recibiera bien la informacion
 	
-  APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_venue_action_data->type, s_venue_action_data->id, s_venue_action_data->name);
+  //APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_venue_action_data->type, s_venue_action_data->id, s_venue_action_data->name);
  
 	
 	//voy a pedir los items con un id de venue a piñón pues no soy capaz de extraerlo
@@ -269,7 +275,7 @@ static void venue_window_unload(Window *window) {
 static void main_action_performed_callback(ActionMenu *action_menu, const ActionMenuItem *action, void *context) {
   // Get data from performed action
   s_main_action_data = action_menu_item_get_action_data(action);
-  APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_main_action_data->type, s_main_action_data->id, s_main_action_data->name);
+//  APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_main_action_data->type, s_main_action_data->id, s_main_action_data->name);
   switch (s_main_action_data->type) {
 		
 		 case ActionTypeFetchVenues: 
@@ -352,6 +358,7 @@ static void main_window_load(Window *window) {
   GRect bounds = layer_get_bounds(main_window_layer);
 
   s_ellipsis_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ELLIPSIS);
+	
   //s_up_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UP);
   //s_down_bitmap = gbitmap_create_with_resource(RESOURCE_ID_DOWN);
 
@@ -367,6 +374,14 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_main_label_layer, GColorClear);
   text_layer_set_text_alignment(s_main_label_layer, GTextAlignmentCenter);
   layer_add_child(main_window_layer, text_layer_get_layer(s_main_label_layer));
+	
+	
+	//logo FSQ
+	s_logoFSQ_bitmap = gbitmap_create_with_resource(RESOURCE_ID_logoFSQ_BLACK);
+	s_logoFSQ_layer= bitmap_layer_create(GRect(0, 145, 144, 27));
+	bitmap_layer_set_bitmap(s_logoFSQ_layer, s_logoFSQ_bitmap);
+	layer_add_child(main_window_layer, bitmap_layer_get_layer(s_logoFSQ_layer));
+	
 }
 
 static void main_window_unload(Window *window) {
@@ -400,7 +415,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 		
 		case 0:    		
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidas las venues en el Pebble"); 
-	  	//s_venue_root_level = action_menu_level_create(length);
+	  	s_venue_root_level = action_menu_level_create(length);
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
 			Tuple *id_venue_tuple = dict_find(iter,i);
 			Tuple *venue_tuple = dict_find(iter,i + 10);		
@@ -526,7 +541,7 @@ static void init() {
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
     
   init_main_action_menu();
-	s_venue_root_level = action_menu_level_create(10);
+ //	s_venue_root_level = action_menu_level_create(10);
  // init_venue_action_menu();
  // init_item_action_menu();
 }

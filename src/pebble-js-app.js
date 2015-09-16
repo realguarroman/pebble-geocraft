@@ -1,24 +1,27 @@
+var session;
+
 
 function fetchVenues(latitude, longitude) {
   var req = new XMLHttpRequest();
-  req.open('GET', 'http://baasbox-soukron.rhcloud.com:8000/plugin/venues.fs.search?ll=' + latitude + ',' + longitude + '&X-BB-SESSION=1b24b1a8-a72f-4e15-a382-36c4282a9c2c', true);
+  req.open('GET', 'http://baasbox-soukron.rhcloud.com:8000/plugin/venues.fs.search?ll=' + latitude + ',' + longitude + '&X-BB-SESSION=' + session, true);
   req.onload = function () {
     if (req.readyState === 4) {
       if (req.status === 200) {
-        console.log(req.responseText);
+     //   console.log(req.responseText);
         var response = JSON.parse(req.responseText);
-				
-        var venue0 = response.data.response.venues[0].name;
-				var venue1 = response.data.response.venues[1].name;
-				var venue2 = response.data.response.venues[2].name;
-    
-        console.log(venue0);
-				console.log(venue1);
-				console.log(venue2);
-  
-       Pebble.sendAppMessage({
-					
-        });
+				var length =  response.data.response.venues.length;
+				if (length > 10) length = 10;
+				// Assemble dictionary using our keys
+				var dictionary = {
+					'DATA_TYPE': 0, //venues
+					'DATA_LENGTH': length,
+				};			
+				var i;
+				for (i = 1; i <= length; i++) { 
+					dictionary["ITEM_" + i + "_ID"] = response.data.response.venues[i-1].id;
+					dictionary["ITEM_" + i + "_NAME"] = response.data.response.venues[i-1].name;
+				}				
+				Pebble.sendAppMessage(dictionary);
       } else {
         console.log('Error');
       }
@@ -54,7 +57,7 @@ Pebble.sendAppMessage({
 	'ITEM_1_ID': '4b7339f8f964a52006a32',
 	'ITEM_1_NAME': 'Llave de oro',
 	'ITEM_2_ID': '473893db0f4788392292',
-	'ITEM_2_NAME': '10 Monedas',
+	'ITEM_2_NAME': '10 Monedas'
 });
 console.log("Ítems enviados al Pebble");
 }
@@ -64,7 +67,7 @@ console.log("Ítems enviados al Pebble");
 
 function locationSuccess(pos) {
   var coordinates = pos.coords;
-  fetchVenuesTest(coordinates.latitude, coordinates.longitude);
+  fetchVenues(coordinates.latitude, coordinates.longitude);
 }
 
 function locationError(err) {
@@ -103,7 +106,7 @@ Pebble.addEventListener("ready",
 															//	console.log(http.responseText);
 															var response = JSON.parse(http.responseText);
 															console.log('X-BB-SESSION -> ' + response.data["X-BB-SESSION"]);
-
+															session = response.data["X-BB-SESSION"];
 														}
 														else {
 															console.log("Ha habido algun error");

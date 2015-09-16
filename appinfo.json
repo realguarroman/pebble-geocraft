@@ -33,6 +33,11 @@
     "resources": {
         "media": [
             {
+                "file": "images/logoFSQ.png",
+                "name": "logoFSQ",
+                "type": "png-trans"
+            },
+            {
                 "file": "images/music_icon_ellipsis.png",
                 "name": "ELLIPSIS",
                 "type": "png"
