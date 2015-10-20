@@ -3,23 +3,23 @@ var session;
 
 function fetchVenues(latitude, longitude) {
   var req = new XMLHttpRequest();
-  req.open('GET', 'http://baasbox-soukron.rhcloud.com:8000/plugin/venues.fs.search?ll=' + latitude + ',' + longitude + '&X-BB-SESSION=' + session, true);
-  req.onload = function () {
+  req.open('GET', 'http://geocraft.oshift.net/plugin/geocraft.search.locations?ll=' + latitude + ',' + longitude + '&X-BB-SESSION=' + session, true);
+	req.onload = function () {
     if (req.readyState === 4) {
-      if (req.status === 200) {
-     //   console.log(req.responseText);
+			if (req.status === 200) {
+        console.log(req.responseText);
         var response = JSON.parse(req.responseText);
-				var length =  response.data.response.venues.length;
+				var length =  response.data.count;
 				if (length > 10) length = 10;
 				// Assemble dictionary using our keys
 				var dictionary = {
-					'DATA_TYPE': 0, //venues
+					'DATA_TYPE': 1, //venues
 					'DATA_LENGTH': length,
 				};			
 				var i;
 				for (i = 1; i <= length; i++) { 
-					dictionary["ITEM_" + i + "_ID"] = response.data.response.venues[i-1].id;
-					dictionary["ITEM_" + i + "_NAME"] = response.data.response.venues[i-1].name;
+					dictionary["ITEM_" + i + "_ID"] = response.data.results[i-1].id;
+					dictionary["ITEM_" + i + "_NAME"] = response.data.results[i-1].name;
 				}				
 				Pebble.sendAppMessage(dictionary);
       } else {
@@ -31,9 +31,40 @@ function fetchVenues(latitude, longitude) {
 }
 
 
+
+function fetchItems(venue_id) {
+  var req = new XMLHttpRequest();
+	console.log('http://geocraft.oshift.net/plugin/geocraft.view.location?venue_id=' + venue_id + '&X-BB-SESSION=' + session);
+  req.open('GET','http://geocraft.oshift.net/plugin/geocraft.view.location?venue_id=' + venue_id + '&X-BB-SESSION=' + session, true);
+	req.onload = function () {
+    if (req.readyState === 4) {
+			if (req.status === 200) {
+        console.log(req.responseText);
+        var response = JSON.parse(req.responseText);
+				var length =  response.data.objects.length;
+				if (length > 10) length = 10;
+				// Assemble dictionary using our keys
+				var dictionary = {
+					'DATA_TYPE': 2, //items
+					'DATA_LENGTH': length,
+				};			
+				var i;
+				for (i = 1; i <= length; i++) { 
+					dictionary["ITEM_" + i + "_ID"] = response.data.objects[i-1].id;
+					dictionary["ITEM_" + i + "_NAME"] = response.data.objects[i-1].name;
+				}				
+				Pebble.sendAppMessage(dictionary);
+      } else {
+        console.log('Error');
+      }
+    }
+  };
+  req.send(null);
+}
+
 function fetchVenuesTest(latitude, longitude) {
 Pebble.sendAppMessage({
-	'DATA_TYPE': 0, //venues
+	'DATA_TYPE': 1, //venues
 	'DATA_LENGTH': 5,
 	'ITEM_1_ID': '4b7339f8f964a52006a32de3',
 	'ITEM_1_NAME': 'Paiporta',
@@ -51,8 +82,13 @@ console.log("Venues enviadas al Pebble");
 
 
 function fetchItemsTest(venue_id) {
+	
+	
+	console.log(venue_id);
+	
+
 Pebble.sendAppMessage({	
-	'DATA_TYPE': 1, //items
+	'DATA_TYPE': 2, //items
 	'DATA_LENGTH': 2,
 	'ITEM_1_ID': '4b7339f8f964a52006a32',
 	'ITEM_1_NAME': 'Llave de oro',
@@ -79,8 +115,9 @@ function locationError(err) {
 }
 
 var locationOptions = {
+	enableHighAccuracy: true,
   'timeout': 15000,
-  'maximumAge': 60000
+  'maximumAge': 0 
 };
 
 
@@ -93,8 +130,14 @@ Pebble.addEventListener("ready",
 													console.log("JS is ready");
 
 													var http = new XMLHttpRequest();
-													var params = '{ "username": "' + Pebble.getAccountToken() + '", "password": "' + Pebble.getWatchToken() + '", "appcode": "1234567890" }';
-													http.open("POST", "http://baasbox-soukron.rhcloud.com:8000/login", true);
+													//var params = '{ "username": "' + Pebble.getAccountToken() + '", "password": "' + Pebble.getWatchToken() + '", "appcode": "1234567890" }';
+													var params = '{ "username": "' + 'api' + '", "password": "' + 'apipassword' + '", "appcode": "1234567890" }';
+													
+													
+													var http2 = new XMLHttpRequest();
+													var params2 = '{ "username": "' + Pebble.getAccountToken() + '", "password": "' + Pebble.getWatchToken() + '"}';
+													
+													http.open("POST", "http://geocraft.oshift.net/login", true);
 
 													//Send the proper header information along with the request
 													http.setRequestHeader("Content-type", "application/json");
@@ -102,17 +145,51 @@ Pebble.addEventListener("ready",
 
 													//Call a function when the state changes
 													http.onload = function() {
-														if(http.readyState == 4 && http.status == 200) {
-															//	console.log(http.responseText);
-															var response = JSON.parse(http.responseText);
-															console.log('X-BB-SESSION -> ' + response.data["X-BB-SESSION"]);
-															session = response.data["X-BB-SESSION"];
+														if (http.status == 401) {
+														//registro
+															
+															
+															http2.open("POST", "http://geocraft.oshift.net/user", true);
+
+															//Send the proper header information along with the request
+															http2.setRequestHeader("Content-type", "application/json");
+															http2.setRequestHeader("X-BAASBOX-APPCODE", "1234567890");
+															http2.setRequestHeader("Connection", "close");
+															http2.send(params2);
 														}
-														else {
-															console.log("Ha habido algun error");
-															console.log(http.responseText);
+														else { //login
+															if(http.readyState == 4 && http.status == 200) {  
+																//	console.log(http.responseText);
+																var response = JSON.parse(http.responseText);
+																console.log('X-BB-SESSION -> ' + response.data["X-BB-SESSION"]);
+																session = response.data["X-BB-SESSION"];
+																var dictionary = {
+																	'DATA_TYPE': 0, //login exitoso
+																	'DATA_LENGTH': 0,
+																};			
+																Pebble.sendAppMessage(dictionary);
+															}
+															else {
+																console.log("Ha habido algun error en el login");
+																console.log(http.responseText);
+															}
 														}
 													};
+													
+													http2.onload = function() {
+															if(http2.readyState == 4 && http2.status == 200) {  //depurar esto dando de baja al usuario, se va al else
+																//	console.log(http.responseText);
+																var response = JSON.parse(http2.responseText);
+																console.log('X-BB-SESSION -> ' + response.data["X-BB-SESSION"]);
+																session = response.data["X-BB-SESSION"];
+																
+															}
+															else {
+																console.log("Ha habido algun error en el registro");
+																console.log(http2.responseText);
+															}
+														
+													}
 
 													http.send(params);
 												});
@@ -123,7 +200,7 @@ Pebble.addEventListener('appmessage', function (e) {
   //Fetch venues
 	if (e.payload.FETCH_TYPE == 0) window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
 	//Fetch items from venues
-	if (e.payload.FETCH_TYPE == 1)  fetchItemsTest(999);
+	if (e.payload.FETCH_TYPE == 1) fetchItems(e.payload.ID_VENUE);
 	
 	
 //	console.log(JSON.stringify(e.payload));

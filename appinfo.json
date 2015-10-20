@@ -3,6 +3,7 @@
         "DATA_LENGTH": 101,
         "DATA_TYPE": 100,
         "FETCH_TYPE": 200,
+        "ID_VENUE": 201,
         "ITEM_10_ID": 10,
         "ITEM_10_NAME": 20,
         "ITEM_1_ID": 1,
@@ -33,6 +34,31 @@
     "resources": {
         "media": [
             {
+                "file": "images/arrows.png",
+                "name": "ARROWS",
+                "type": "png"
+            },
+            {
+                "file": "images/venue0.png",
+                "name": "VENUE0",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/icon_down",
+                "name": "ICON_DOWN",
+                "type": "png"
+            },
+            {
+                "file": "images/icon_up",
+                "name": "ICON_UP",
+                "type": "png"
+            },
+            {
                 "file": "images/logoFSQ.png",
                 "name": "logoFSQ",
                 "type": "png-trans"
@@ -48,7 +74,8 @@
     "shortName": "geocraft",
     "targetPlatforms": [
         "aplite",
-        "basalt"
+        "basalt",
+        "chalk"
     ],
     "uuid": "0EF3F895-1E14-4EA2-B5D0-38951F3686C2",
     "versionLabel": "1.0",

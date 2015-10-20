@@ -6,6 +6,7 @@
 #define DATA_TYPE			100
 #define DATA_LENGTH		101
 #define FETCH_TYPE		200
+#define ID_VENUE  		201
 #define	ITEM_1_ID			1
 #define	ITEM_1_NAME		11
 #define	ITEM_2_ID			2
@@ -28,6 +29,31 @@
 #define	ITEM_10_NAME	20
 	
 
+#define ANIM_DURATION 250
+	
+#define LABEL_NAME_X 5
+#define LABEL_NAME_Y 0
+#define LABEL_NAME_WIDTH 103
+#define LABEL_NAME_HEIGHT 75
+#define LABEL_NAME_ANIM_UP -168
+#define LABEL_NAME_ANIM_DOWN 168	
+#define OFFSET_Y 168
+
+#define LABEL_ICON_X 5
+#define LABEL_ICON_Y 93
+#define LABEL_ICON_WIDTH 56
+#define LABEL_ICON_HEIGHT 65
+#define LABEL_ICON_ANIM_UP -75
+#define LABEL_ICON_ANIM_DOWN 168	
+
+#define LABEL_PAGINATION_X 63
+#define LABEL_PAGINATION_Y 130
+#define LABEL_PAGINATION_WIDTH 50
+#define LABEL_PAGINATION_HEIGHT 25
+
+
+#define	MAX_NUMBER_STRINGS 10
+#define	MAX_STRING_SIZE	50
 	
 // Types of actions
 typedef enum {
@@ -50,10 +76,18 @@ typedef struct {
 } Context;
 
 
+char venues_names[MAX_NUMBER_STRINGS][MAX_STRING_SIZE]; 
+char venues_ids[MAX_NUMBER_STRINGS][MAX_STRING_SIZE]; 
+
+char items_names[MAX_NUMBER_STRINGS][MAX_STRING_SIZE]; 
+char items_ids[MAX_NUMBER_STRINGS][MAX_STRING_SIZE]; 
+
 // Main window variables
 static Window *s_main_window;
 static TextLayer *s_main_label_layer;
 static ActionBarLayer *s_main_action_bar;
+
+
 
 static ActionMenu *s_main_action_menu;
 static ActionMenuLevel *s_main_root_level, *s_main_inventory_level, *s_main_venues_level;
@@ -63,6 +97,11 @@ static Context *s_main_action_data;
 static Window *s_venue_window;
 static TextLayer *s_venue_label_layer;
 static ActionBarLayer *s_venue_action_bar;
+static BitmapLayer *s_venue_icon_layer;
+static TextLayer *s_venue_pagination_layer;
+
+
+
 
 static ActionMenu *s_venue_action_menu;
 static ActionMenuLevel *s_venue_root_level, *s_venue_inventory_level, *s_venue_items_level;
@@ -72,14 +111,55 @@ static Context *s_venue_action_data;
 static Window *s_item_window;
 static TextLayer *s_item_label_layer;
 static ActionBarLayer *s_item_action_bar;
+static BitmapLayer *s_item_icon_layer;
 
 static ActionMenu *s_item_action_menu;
 static ActionMenuLevel *s_item_root_level, *s_item_inventory_level, *s_item_items_level;
 static Context *s_item_action_data;
 
 // Other variables
-static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap;
+static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap, *s_icon_bitmap;
 static BitmapLayer *s_logoFSQ_layer;
+static bool LOGGED_IN = false;
+static int s_active_venue;
+static int s_active_item;
+static int s_venue_length;
+static int s_item_length;
+
+//temporizadores
+AppTimer *timer;
+AppTimer *timer2;
+
+/****************************** Animation *************************************************/
+
+void on_animation_stopped(Animation *anim, bool finished, void *context)
+{
+    //Free the memoery used by the Animation
+    property_animation_destroy((PropertyAnimation*) anim);
+}
+ 
+void animate_layer(Layer *layer, GRect *start, GRect *finish, int duration, int delay)
+{
+    //Declare animation
+    PropertyAnimation *anim = property_animation_create_layer_frame(layer, start, finish);
+ 
+    //Set characteristics
+    animation_set_duration((Animation*) anim, duration);
+    animation_set_delay((Animation*) anim, delay);
+ 
+    //Set stopped handler to free memory
+    AnimationHandlers handlers = {
+        //The reference to the stopped handler is the only one in the array
+        .stopped = (AnimationStoppedHandler) on_animation_stopped
+    };
+    animation_set_handlers((Animation*) anim, handlers, NULL);
+ 
+    //Start animation!
+    animation_schedule((Animation*) anim);
+}
+
+
+
 
 /****************************** Request Data to JS ****************************************/
 
@@ -100,10 +180,58 @@ static void request_items(char* id_venue) {
 		app_message_outbox_begin(&iter);
 		// Add a key-value pair
 		dict_write_uint8(iter, FETCH_TYPE, 1); // 1 es buscar ítems
+  	dict_write_cstring(iter, ID_VENUE, id_venue); 
 		// Send the message!
 		app_message_outbox_send();
 		APP_LOG(APP_LOG_LEVEL_INFO, "Ítems solicitados"); 
 }
+
+
+
+
+/********************* ANimations *******************/
+
+void animate_label_up_first(Layer *l) {
+	GRect a = layer_get_frame(l);
+	GRect b = GRect(a.origin.x,a.origin.y + OFFSET_Y + 1,a.size.w,a.size.h);
+  animate_layer(l, &a, &b, ANIM_DURATION, 0);
+//	APP_LOG(APP_LOG_LEVEL_INFO, "Valor de y up first = %d)", a.origin.y);
+
+}
+
+void animate_label_up_last(Layer *l) {
+
+	GRect a = layer_get_frame(l);
+	GRect b = GRect(a.origin.x,a.origin.x - OFFSET_Y - OFFSET_Y,a.size.w,a.size.h);
+	GRect c = GRect(a.origin.x,a.origin.y - OFFSET_Y,a.size.w,a.size.h);
+  animate_layer(l, &b, &c, ANIM_DURATION, 0);
+//	APP_LOG(APP_LOG_LEVEL_INFO, "Valor de y up last = %d)", a.origin.y);
+
+}
+
+	
+void animate_label_down_first(Layer *l) {
+	
+	
+	GRect a = layer_get_frame(l);
+	GRect b = GRect(a.origin.x,a.origin.y - OFFSET_Y - 1,a.size.w,a.size.h);
+  animate_layer(l, &a, &b, ANIM_DURATION, 0);
+//	APP_LOG(APP_LOG_LEVEL_INFO, "Valor de y down first = %d)", a.origin.y);
+	
+}
+
+void animate_label_down_last(Layer *l) {
+	
+	
+	GRect a = layer_get_frame(l);
+	GRect b = GRect(a.origin.x,a.origin.y + OFFSET_Y + OFFSET_Y,a.size.w,a.size.h);
+	GRect c = GRect(a.origin.x,a.origin.y + OFFSET_Y,a.size.w,a.size.h);
+  animate_layer(l, &b, &c, ANIM_DURATION, 0);
+//	APP_LOG(APP_LOG_LEVEL_INFO, "Valor de y down last = %d)", a.origin.y);
+
+
+}
+
 
 /****************************** Item  ActionMenu *****************************/
 
@@ -121,6 +249,22 @@ static void init_item_action_menu() {
   action_menu_level_add_action(s_item_root_level, "Mirar", item_action_performed_callback, NULL);
   action_menu_level_add_action(s_item_root_level, "Dejar", item_action_performed_callback, NULL);
 }
+
+
+/********************************* Update  Layers **********************************************/
+
+static void update_venue_layers (int id) {
+	static char pagination[] = "10/10";
+	snprintf(pagination, sizeof(pagination), "%d/%d", s_active_venue+1, s_venue_length);
+	text_layer_set_text(s_venue_label_layer, venues_names[id]);
+	text_layer_set_text(s_venue_pagination_layer, pagination);
+	
+}
+
+static void update_item_layers (int id) {
+	text_layer_set_text(s_item_label_layer, items_names[id]);
+}
+
 
 /******************************** Item  Clicks ********************************/
 
@@ -144,31 +288,82 @@ static void item_select_click_handler(ClickRecognizerRef recognizer, void *conte
   s_item_action_menu = action_menu_open(&item_action_menu_config);
 }
 
+
+
+
+
+
+void timer2_callback_up(void *data) {
+	update_item_layers(s_active_item);
+	animate_label_up_last(text_layer_get_layer(s_item_label_layer));
+}
+void timer2_callback_down(void *data) {
+	update_item_layers(s_active_item);
+	animate_label_down_last(text_layer_get_layer(s_item_label_layer));
+}
+	
+static void item_select_up_handler(ClickRecognizerRef recognizer, void *context) {
+	if (s_active_item>=1) {
+		animate_label_up_first(text_layer_get_layer(s_item_label_layer));
+		s_active_item=s_active_item-1;
+		//suscribirse a temporizadores 
+		timer = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer2_callback_up, NULL);
+	}
+}
+
+static void item_select_down_handler(ClickRecognizerRef recognizer, void *context) {
+	if (s_active_item<(s_item_length-1)) {
+		animate_label_down_first(text_layer_get_layer(s_item_label_layer));
+		s_active_item=s_active_item+1;
+		//suscribirse a temporizadores 
+		timer2 = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer2_callback_down, NULL);
+	}
+}
+
+
 static void item_click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, item_select_click_handler);
+	window_single_click_subscribe(BUTTON_ID_UP, item_select_up_handler);
+	window_single_click_subscribe(BUTTON_ID_DOWN, item_select_down_handler);
 }
+
+
+
+
 
 /******************************* Item  Window ********************************/
 
 static void item_window_load(Window *window) {
-  // Let's use s_main_action_data as basic information (venue id, venue name)
-  // More information to get from remote API like address and/or objects
-  
+
   Layer *item_window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(item_window_layer);
 
   s_item_action_bar = action_bar_layer_create();
   action_bar_layer_set_click_config_provider(s_item_action_bar, item_click_config_provider);
   action_bar_layer_set_icon(s_item_action_bar, BUTTON_ID_SELECT, s_ellipsis_bitmap);
+	action_bar_layer_set_icon(s_item_action_bar, BUTTON_ID_UP, s_up_bitmap);
+	action_bar_layer_set_icon(s_item_action_bar, BUTTON_ID_DOWN, s_down_bitmap);
   action_bar_layer_add_to_window(s_item_action_bar, window);
 
-  s_item_label_layer = text_layer_create(GRect(0, 0, bounds.size.w - ACTION_BAR_WIDTH, bounds.size.h));
-  text_layer_set_text(s_item_label_layer, s_main_action_data->name);
-  text_layer_set_font(s_item_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+ 
+  s_item_label_layer = text_layer_create(GRect(LABEL_NAME_X,LABEL_NAME_Y,LABEL_NAME_WIDTH,LABEL_NAME_HEIGHT));
+  text_layer_set_text(s_item_label_layer, "");
+  text_layer_set_font(s_item_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_text_color(s_item_label_layer, GColorBlack);
-  text_layer_set_background_color(s_item_label_layer, GColorClear);
-  text_layer_set_text_alignment(s_item_label_layer, GTextAlignmentCenter);
+	
+	
+	#ifdef PBL_COLOR
+		window_set_background_color(window, GColorCyan);
+		text_layer_set_background_color(s_item_label_layer, GColorCyan);
+	#else
+  #endif
+		
+		
+  text_layer_set_text_alignment(s_item_label_layer, GTextAlignmentLeft);
   layer_add_child(item_window_layer, text_layer_get_layer(s_item_label_layer));
+	
+	
+	
+
 }
 
 static void item_window_unload(Window *window) {
@@ -177,86 +372,97 @@ static void item_window_unload(Window *window) {
   action_menu_unfreeze(s_main_action_menu);
 }
 
-/****************************** Venue  ActionMenu *****************************/
-
-static void venue_action_performed_callback(ActionMenu *action_menu, const ActionMenuItem *action, void *context) {
-  // Get data from performed action
-  vibes_short_pulse();
-	
-	Context *caca;
-	
- 	caca = action_menu_item_get_action_data(action);
-	APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d", caca->type);
-	//tengo problemas con los campos que vienen en Context, me salen cosas raras, voy a seguir como si recibiera bien la informacion
-	
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_venue_action_data->type, s_venue_action_data->id, s_venue_action_data->name);
- 
-	
-	//voy a pedir los items con un id de venue a piñón pues no soy capaz de extraerlo
-	
-	request_items("4c38c73893db0f4788392292");
-	action_menu_freeze(s_venue_action_menu); 
-	
-	//switch(s_venue_action_data->type) {
-  //  case ActionTypeGetItem:
-  //  break;
-  //case ActionTypeDropItem:
-  //  break;
-  //default:
-  //  break;
- // }
-
-}
-
 
 
 /******************************** Venue  Clicks ********************************/
 
 static void venue_select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Configure the ActionMenu Window about to be shown
-  ActionMenuConfig venue_action_menu_config = (ActionMenuConfig) {
-    .root_level = s_venue_root_level,
-    .colors = {
-      #ifdef PBL_COLOR
-      .background = GColorChromeYellow,
-      .foreground = GColorBlack,
-			#else
-      .background = GColorWhite,
-      .foreground = GColorBlack,
-			#endif
-    },
-    .align = ActionMenuAlignCenter
-  };
+  request_items(venues_ids[s_active_venue]);
+}
 
-  // Show the ActionMenu
-  s_venue_action_menu = action_menu_open(&venue_action_menu_config);
+
+
+void timer_callback_up(void *data) {
+	update_venue_layers(s_active_venue);
+	animate_label_up_last(text_layer_get_layer(s_venue_label_layer));
+	animate_label_up_last(text_layer_get_layer(s_venue_pagination_layer));
+	animate_label_up_last(bitmap_layer_get_layer(s_venue_icon_layer));
+}
+void timer_callback_down(void *data) {
+	update_venue_layers(s_active_venue);
+	animate_label_down_last(text_layer_get_layer(s_venue_label_layer));
+	animate_label_down_last(text_layer_get_layer(s_venue_pagination_layer));
+	animate_label_down_last(bitmap_layer_get_layer(s_venue_icon_layer));
+}
+	
+static void venue_select_up_handler(ClickRecognizerRef recognizer, void *context) {
+	if (s_active_venue>=1) {
+		animate_label_up_first(text_layer_get_layer(s_venue_label_layer));
+		animate_label_up_first(text_layer_get_layer(s_venue_pagination_layer));
+		animate_label_up_first(bitmap_layer_get_layer(s_venue_icon_layer));
+		s_active_venue=s_active_venue-1;
+		//suscribirse a temporizadores 
+		timer = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer_callback_up, NULL);	
+	}
+ 	
+}
+
+static void venue_select_down_handler(ClickRecognizerRef recognizer, void *context) {
+	if (s_active_venue<(s_venue_length-1)) {
+		animate_label_down_first(text_layer_get_layer(s_venue_label_layer));
+		animate_label_down_first(text_layer_get_layer(s_venue_pagination_layer));
+		animate_label_down_first(bitmap_layer_get_layer(s_venue_icon_layer));
+		s_active_venue=s_active_venue+1;
+		//suscribirse a temporizadores 
+		timer = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer_callback_down, NULL);
+	}
 }
 
 static void venue_click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, venue_select_click_handler);
+	window_single_click_subscribe(BUTTON_ID_UP, venue_select_up_handler);
+	window_single_click_subscribe(BUTTON_ID_DOWN, venue_select_down_handler);
 }
 
 /******************************* Venue  Window ********************************/
 
 static void venue_window_load(Window *window) {
-  // Let's use s_main_action_data as basic information (venue id, venue name)
-  // More information to get from remote API like address and/or objects
-  
   Layer *venue_window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(venue_window_layer);
 
   s_venue_action_bar = action_bar_layer_create();
   action_bar_layer_set_click_config_provider(s_venue_action_bar, venue_click_config_provider);
   action_bar_layer_set_icon(s_venue_action_bar, BUTTON_ID_SELECT, s_ellipsis_bitmap);
+	action_bar_layer_set_icon(s_venue_action_bar, BUTTON_ID_UP, s_up_bitmap);
+	action_bar_layer_set_icon(s_venue_action_bar, BUTTON_ID_DOWN, s_down_bitmap);
   action_bar_layer_add_to_window(s_venue_action_bar, window);
 
-  s_venue_label_layer = text_layer_create(GRect(0, 0, bounds.size.w - ACTION_BAR_WIDTH, bounds.size.h));
-  text_layer_set_text(s_venue_label_layer, s_main_action_data->name);
+  s_venue_label_layer = text_layer_create(GRect(LABEL_NAME_X,LABEL_NAME_Y,LABEL_NAME_WIDTH,LABEL_NAME_HEIGHT));
+  text_layer_set_text(s_venue_label_layer, "Universidad Politecnica de Valencia");
   text_layer_set_font(s_venue_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_text_color(s_venue_label_layer, GColorBlack);
-  text_layer_set_background_color(s_venue_label_layer, GColorClear);
-  text_layer_set_text_alignment(s_venue_label_layer, GTextAlignmentCenter);
+  text_layer_set_text_alignment(s_venue_label_layer, GTextAlignmentLeft);
   layer_add_child(venue_window_layer, text_layer_get_layer(s_venue_label_layer));
+	
+	s_venue_pagination_layer = text_layer_create(GRect(LABEL_PAGINATION_X,LABEL_PAGINATION_Y,LABEL_PAGINATION_WIDTH,LABEL_PAGINATION_HEIGHT));
+  text_layer_set_text(s_venue_pagination_layer, "10/10");
+  text_layer_set_font(s_venue_pagination_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text_color(s_venue_pagination_layer, GColorBlack);
+  text_layer_set_text_alignment(s_venue_pagination_layer, GTextAlignmentCenter);
+  layer_add_child(venue_window_layer, text_layer_get_layer(s_venue_pagination_layer));
+	
+	
+	s_venue_icon_layer= bitmap_layer_create(GRect(LABEL_ICON_X, LABEL_ICON_Y, LABEL_ICON_WIDTH, LABEL_ICON_HEIGHT));
+	s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE0);
+	bitmap_layer_set_bitmap(s_venue_icon_layer, s_icon_bitmap);
+	layer_add_child(venue_window_layer, bitmap_layer_get_layer(s_venue_icon_layer));
+	
+	#ifdef PBL_COLOR
+		window_set_background_color(window, GColorYellow);
+		text_layer_set_background_color(s_venue_label_layer, GColorYellow);
+		text_layer_set_background_color(s_venue_pagination_layer, GColorYellow);
+	#else
+  #endif
 }
 
 static void venue_window_unload(Window *window) {
@@ -275,7 +481,7 @@ static void venue_window_unload(Window *window) {
 static void main_action_performed_callback(ActionMenu *action_menu, const ActionMenuItem *action, void *context) {
   // Get data from performed action
   s_main_action_data = action_menu_item_get_action_data(action);
-//  APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_main_action_data->type, s_main_action_data->id, s_main_action_data->name);
+  APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_main_action_data->type, s_main_action_data->id, s_main_action_data->name);
   switch (s_main_action_data->type) {
 		
 		 case ActionTypeFetchVenues: 
@@ -314,9 +520,9 @@ static void init_main_action_menu() {
   
   
 	action_menu_level_add_action (s_main_root_level, "Búsqueda", main_action_performed_callback,
-															  &(Context){.type=ActionTypeFetchVenues});
+															  &(Context){.type=ActionTypeFetchVenues,.id="busqueda_id",.name="busqueda_name"});
 	action_menu_level_add_action (s_main_root_level, "Inventario", main_action_performed_callback,
-															  &(Context){.type=ActionTypeShowInventory});
+															  &(Context){.type=ActionTypeShowInventory,.id="inventario_id",.name="inventario_name"});
 	
 	
  
@@ -326,25 +532,24 @@ static void init_main_action_menu() {
 
 static void main_select_click_handler(ClickRecognizerRef recognizer, void *context) {
 	//request_venues();
-	
+	if (LOGGED_IN) {
   // Configure the ActionMenu Window about to be shown
-  ActionMenuConfig main_action_menu_config = (ActionMenuConfig) {
-    .root_level = s_main_root_level,
-    .colors = {
-      #ifdef PBL_COLOR
-      .background = GColorChromeYellow,
-      .foreground = GColorBlack,
-			#else
-      .background = GColorWhite,
-      .foreground = GColorBlack,
-			#endif
-    },
-    .align = ActionMenuAlignCenter
-  };
-
-  // Show the ActionMenu
-	s_main_action_menu = action_menu_open(&main_action_menu_config);
-//	action_menu_freeze(s_main_action_menu); //no me gusta esto
+		ActionMenuConfig main_action_menu_config = (ActionMenuConfig) {
+			.root_level = s_main_root_level,
+			.colors = {
+				#ifdef PBL_COLOR
+				.background = GColorChromeYellow,
+				.foreground = GColorBlack,
+				#else
+				.background = GColorWhite,
+				.foreground = GColorBlack,
+				#endif
+			},
+			.align = ActionMenuAlignCenter
+		};
+		// Show the ActionMenu
+		s_main_action_menu = action_menu_open(&main_action_menu_config);
+	}
 }
 
 static void main_click_config_provider(void *context) {
@@ -357,10 +562,9 @@ static void main_window_load(Window *window) {
   Layer *main_window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(main_window_layer);
 
-  s_ellipsis_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ELLIPSIS);
-	
-  //s_up_bitmap = gbitmap_create_with_resource(RESOURCE_ID_UP);
-  //s_down_bitmap = gbitmap_create_with_resource(RESOURCE_ID_DOWN);
+  s_ellipsis_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ARROWS);	
+  s_up_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_UP);
+  s_down_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_DOWN);
 
   s_main_action_bar = action_bar_layer_create();
   action_bar_layer_set_click_config_provider(s_main_action_bar, main_click_config_provider);
@@ -374,6 +578,15 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_main_label_layer, GColorClear);
   text_layer_set_text_alignment(s_main_label_layer, GTextAlignmentCenter);
   layer_add_child(main_window_layer, text_layer_get_layer(s_main_label_layer));
+	
+	
+
+	
+	
+//static BitmapLayer *s_icon_layer;
+//static ActionBarLayer *s_item_bar;
+	
+
 	
 	
 	//logo FSQ
@@ -409,71 +622,47 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 	int length = length_tuple->value->int32;
 	Tuple *type_tuple = dict_find(iter,DATA_TYPE);
 	
-	//APP_LOG(APP_LOG_LEVEL_INFO, "Tipo de datos recibidos: %d", type_tuple->value->int32); 
+	//APP_LOG(APP_LOG_LEVEL_INFO, "Tipo de datos recibidos: %i", type_tuple->value->int32); 
 
 	switch (type_tuple->value->int32) {
 		
-		case 0:    		
+		case 0:
+			APP_LOG(APP_LOG_LEVEL_INFO, "Login exitoso"); 
+			LOGGED_IN = true;
+			gbitmap_destroy(s_ellipsis_bitmap);
+			s_ellipsis_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ELLIPSIS);
+	  	action_bar_layer_set_icon(s_main_action_bar, BUTTON_ID_SELECT, s_ellipsis_bitmap);
+		break;
+		
+		case 1:    		
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidas las venues en el Pebble"); 
-	  	s_venue_root_level = action_menu_level_create(length);
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
-			Tuple *id_venue_tuple = dict_find(iter,i);
-			Tuple *venue_tuple = dict_find(iter,i + 10);		
-			action_menu_level_add_action(s_venue_root_level, venue_tuple->value->cstring, venue_action_performed_callback, 
-																&(Context){ .type=ActionTypeFetchItems,.id=id_venue_tuple->value->cstring,.name=venue_tuple->value->cstring});
+				strcpy(venues_ids[i-1], dict_find(iter,i)->value->cstring);
+				strcpy(venues_names[i-1], dict_find(iter,i+10)->value->cstring);				
 			}
-
-			ActionMenuConfig venue_action_menu_config = (ActionMenuConfig) {
-				.root_level = s_venue_root_level,
-				.colors = {
-					#ifdef PBL_COLOR
-					.background = GColorCyan,
-					.foreground = GColorBlack,
-					#else
-					.background = GColorWhite,
-					.foreground = GColorBlack,
-					#endif
-				},
-				.align = ActionMenuAlignCenter
-			};
 			action_menu_unfreeze(s_main_action_menu);
-			// Show the ActionMenu
-			s_venue_action_menu = action_menu_open(&venue_action_menu_config);
+			window_stack_push(s_venue_window, true);
+			s_active_venue=0;
+		  s_venue_length=length;
+			update_venue_layers(s_active_venue);
+		break;
+		
+		case 2:    		
+			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidos los items en el Pebble"); 
+			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
+				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
+				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
+			}
+			action_menu_unfreeze(s_main_action_menu);
+			window_stack_push(s_item_window, true);
+			s_active_item=0;
+  		s_item_length=length;
+			update_item_layers(s_active_item);
 		break;
 		
 		
-		case 1:    	
-		APP_LOG(APP_LOG_LEVEL_INFO, "Recibidos los items en el Pebble"); 
-		s_item_root_level = action_menu_level_create(length);
-		for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
-			Tuple *id_item_tuple = dict_find(iter,i);
-			Tuple *item_tuple = dict_find(iter,i + 10);		
-  		action_menu_level_add_action(s_item_root_level, item_tuple->value->cstring, item_action_performed_callback, 
-																	 &(Context){ .type=ActionTypeFetchItems,.id=id_item_tuple->value->cstring,.name=item_tuple->value->cstring});
-		}
 
-		ActionMenuConfig item_action_menu_config = (ActionMenuConfig) {
-			.root_level = s_item_root_level,
-			.colors = {
-				#ifdef PBL_COLOR
-					.background = GColorGreen,
-				.foreground = GColorBlack,
-				#else
-					.background = GColorWhite,
-				.foreground = GColorBlack,
-				#endif
-			},
-				.align = ActionMenuAlignCenter
-		};
-		action_menu_unfreeze(s_venue_action_menu);
-		// Show the ActionMenu
-		s_item_action_menu = action_menu_open(&item_action_menu_config);
-		break;
-		
-	
-  }
-
-	
+	}
 	
 	
 }
