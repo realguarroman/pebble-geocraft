@@ -259,6 +259,36 @@ static void update_venue_layers (int id) {
 	text_layer_set_text(s_venue_label_layer, venues_names[id]);
 	text_layer_set_text(s_venue_pagination_layer, pagination);
 	
+	gbitmap_destroy(s_icon_bitmap);
+	
+	int question3=rand()%6;
+	switch(question3)
+	{
+		case 0:
+		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE0);
+		break;
+		case 1:
+		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE1);
+		break;
+		case 2:
+		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE2);
+		break;
+		case 3:
+		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE3);
+		break;
+		case 4:
+		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE4);
+		break;
+		case 5:
+		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE5);
+		break;
+		case 6:
+		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE6);
+		break;
+	
+	
+	}
+	bitmap_layer_set_bitmap(s_venue_icon_layer, s_icon_bitmap);
 }
 
 static void update_item_layers (int id) {
@@ -428,7 +458,6 @@ static void venue_click_config_provider(void *context) {
 
 static void venue_window_load(Window *window) {
   Layer *venue_window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(venue_window_layer);
 
   s_venue_action_bar = action_bar_layer_create();
   action_bar_layer_set_click_config_provider(s_venue_action_bar, venue_click_config_provider);
@@ -453,7 +482,7 @@ static void venue_window_load(Window *window) {
 	
 	
 	s_venue_icon_layer= bitmap_layer_create(GRect(LABEL_ICON_X, LABEL_ICON_Y, LABEL_ICON_WIDTH, LABEL_ICON_HEIGHT));
-	s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE0);
+	s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE2);
 	bitmap_layer_set_bitmap(s_venue_icon_layer, s_icon_bitmap);
 	layer_add_child(venue_window_layer, bitmap_layer_get_layer(s_venue_icon_layer));
 	
@@ -720,6 +749,10 @@ static void init() {
   });
   
   // Show main window
+	
+	#ifdef PBL_PLATFORM_APLITE
+		window_set_fullscreen(s_main_window, true);
+	#endif
   window_stack_push(s_main_window, true);
 	
 	// Register callbacks
