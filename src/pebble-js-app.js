@@ -42,16 +42,25 @@ function fetchItems(venue_id) {
         console.log(req.responseText);
         var response = JSON.parse(req.responseText);
 				var length =  response.data.objects.length;
+				var slots =  response.data.slots;
+				
+			//	console.log('slots');
+			//	console.log(slots);
+				
 				if (length > 10) length = 10;
 				// Assemble dictionary using our keys
 				var dictionary = {
 					'DATA_TYPE': 2, //items
-					'DATA_LENGTH': length,
+					'DATA_LENGTH': slots,
 				};			
 				var i;
 				for (i = 1; i <= length; i++) { 
 					dictionary["ITEM_" + i + "_ID"] = response.data.objects[i-1].id;
 					dictionary["ITEM_" + i + "_NAME"] = response.data.objects[i-1].name;
+				}			
+				for (i = length + 1; i <= slots; i++) { 
+					dictionary["ITEM_" + i + "_ID"] = 0;
+					dictionary["ITEM_" + i + "_NAME"] = "empty";
 				}				
 				Pebble.sendAppMessage(dictionary);
       } else {
@@ -62,41 +71,6 @@ function fetchItems(venue_id) {
   req.send(null);
 }
 
-function fetchVenuesTest(latitude, longitude) {
-Pebble.sendAppMessage({
-	'DATA_TYPE': 1, //venues
-	'DATA_LENGTH': 5,
-	'ITEM_1_ID': '4b7339f8f964a52006a32de3',
-	'ITEM_1_NAME': 'Paiporta',
-	'ITEM_2_ID': '4c38c73893db0f4788392292',
-	'ITEM_2_NAME': 'Auditori Paiporta',
-	'ITEM_3_ID': '4e2dea85b0fbdc2b64f23f3b',
-	'ITEM_3_NAME': 'PLAZA MAYOR',
-	'ITEM_4_ID': '4f40f809e4b028f640a5a1c1',
-	'ITEM_4_NAME': 'AMANECER',
-	'ITEM_5_ID': '4f40f809e4b0287640a5a1c1',
-	'ITEM_5_NAME': 'JARL'
-});
-console.log("Venues enviadas al Pebble");
-}
-
-
-function fetchItemsTest(venue_id) {
-	
-	
-	console.log(venue_id);
-	
-
-Pebble.sendAppMessage({	
-	'DATA_TYPE': 2, //items
-	'DATA_LENGTH': 2,
-	'ITEM_1_ID': '4b7339f8f964a52006a32',
-	'ITEM_1_NAME': 'Llave de oro',
-	'ITEM_2_ID': '473893db0f4788392292',
-	'ITEM_2_NAME': '10 Monedas'
-});
-console.log("Ítems enviados al Pebble");
-}
 
 
 
