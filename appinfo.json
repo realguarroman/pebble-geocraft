@@ -94,11 +94,6 @@
                 "type": "png"
             },
             {
-                "file": "images/arrows.png",
-                "name": "ARROWS",
-                "type": "png"
-            },
-            {
                 "file": "images/venue0.png",
                 "name": "VENUE0",
                 "targetPlatforms": [
@@ -109,13 +104,8 @@
                 "type": "png"
             },
             {
-                "file": "images/icon_down",
-                "name": "ICON_DOWN",
-                "type": "png"
-            },
-            {
-                "file": "images/icon_up",
-                "name": "ICON_UP",
+                "file": "images/music_icon_ellipsis.png",
+                "name": "ELLIPSIS",
                 "type": "png"
             },
             {
@@ -124,8 +114,18 @@
                 "type": "png-trans"
             },
             {
-                "file": "images/music_icon_ellipsis.png",
-                "name": "ELLIPSIS",
+                "file": "images/icon_up",
+                "name": "ICON_UP",
+                "type": "png"
+            },
+            {
+                "file": "images/icon_down",
+                "name": "ICON_DOWN",
+                "type": "png"
+            },
+            {
+                "file": "images/arrows.png",
+                "name": "ARROWS",
                 "type": "png"
             }
         ]

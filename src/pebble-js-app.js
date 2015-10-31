@@ -56,7 +56,7 @@ function fetchItems(venue_id) {
 				var i;
 				for (i = 1; i <= length; i++) { 
 					dictionary["ITEM_" + i + "_ID"] = response.data.objects[i-1].id;
-					dictionary["ITEM_" + i + "_NAME"] = response.data.objects[i-1].name;
+					dictionary["ITEM_" + i + "_NAME"] = response.data.objects[i-1].object_type.name;
 				}			
 				for (i = length + 1; i <= slots; i++) { 
 					dictionary["ITEM_" + i + "_ID"] = 0;
