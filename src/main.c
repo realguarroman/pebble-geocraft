@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include "action_menu.h"
-	
+#include "dialog_choice.h"
 
 		
 #define DATA_TYPE			100
@@ -320,24 +320,9 @@ static void update_item_layers (int id) {
 /******************************** Item  Clicks ********************************/
 
 static void item_select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // Configure the ActionMenu Window about to be shown
-  ActionMenuConfig item_action_menu_config = (ActionMenuConfig) {
-    .root_level = s_item_root_level,
-    .colors = {
-      #ifdef PBL_COLOR
-      .background = GColorChromeYellow,
-      .foreground = GColorBlack,
-			#else
-      .background = GColorWhite,
-      .foreground = GColorBlack,
-			#endif
-    },
-    .align = ActionMenuAlignCenter
-  };
-
-  // Show the ActionMenu
-  s_item_action_menu = action_menu_open(&item_action_menu_config);
+  dialog_choice_window_push();
 }
+
 
 
 
@@ -440,6 +425,7 @@ static void item_window_load(Window *window) {
 
 static void item_window_unload(Window *window) {
   text_layer_destroy(s_item_label_layer);
+	text_layer_destroy(s_item_pagination_layer);
   action_bar_layer_destroy(s_item_action_bar);
   action_menu_unfreeze(s_main_action_menu);
 }
@@ -544,6 +530,8 @@ static void venue_window_load(Window *window) {
 
 static void venue_window_unload(Window *window) {
   text_layer_destroy(s_venue_label_layer);
+	text_layer_destroy(s_venue_pagination_layer);
+	bitmap_layer_destroy(s_venue_icon_layer);
   action_bar_layer_destroy(s_venue_action_bar);
   action_menu_unfreeze(s_main_action_menu);
 }

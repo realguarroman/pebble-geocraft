@@ -42,7 +42,7 @@ function fetchItems(venue_id) {
         console.log(req.responseText);
         var response = JSON.parse(req.responseText);
 				var length =  response.data.objects.length;
-				var slots =  response.data.slots;
+				var slots =  response.data.location_category.slots;
 				
 			//	console.log('slots');
 			//	console.log(slots);
