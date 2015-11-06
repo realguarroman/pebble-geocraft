@@ -105,8 +105,8 @@ Pebble.addEventListener("ready",
 													console.log("JS is ready");
 
 													var http = new XMLHttpRequest();
-													//var params = '{ "username": "' + Pebble.getAccountToken() + '", "password": "' + Pebble.getWatchToken() + '", "appcode": "1234567890" }';
-													var params = '{ "username": "' + 'api' + '", "password": "' + 'apipassword' + '", "appcode": "1234567890" }';
+													var params = '{ "username": "' + Pebble.getAccountToken() + '", "password": "' + Pebble.getWatchToken() + '", "appcode": "1234567890" }';
+												//	var params = '{ "username": "' + 'api' + '", "password": "' + 'apipassword' + '", "appcode": "1234567890" }';
 													
 													
 													var http2 = new XMLHttpRequest();

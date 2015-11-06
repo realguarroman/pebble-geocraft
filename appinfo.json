@@ -44,6 +44,11 @@
     "resources": {
         "media": [
             {
+                "file": "images/warning.png",
+                "name": "WARNING",
+                "type": "png"
+            },
+            {
                 "file": "images/mistery.png",
                 "name": "MISTERY",
                 "type": "png"
@@ -163,6 +168,7 @@
     "sdkVersion": "3",
     "shortName": "geocraft",
     "targetPlatforms": [
+        "aplite",
         "basalt",
         "chalk"
     ],
