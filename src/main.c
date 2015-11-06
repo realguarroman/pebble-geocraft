@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include "action_menu.h"
-#include "dialog_choice.h"
+
 
 		
 #define DATA_TYPE			100
@@ -9,24 +9,34 @@
 #define ID_VENUE  		201
 #define	ITEM_1_ID			1
 #define	ITEM_1_NAME		11
+#define	ITEM_1_ICON		21
 #define	ITEM_2_ID			2
 #define	ITEM_2_NAME		12
+#define	ITEM_2_ICON		22
 #define	ITEM_3_ID			3
 #define	ITEM_3_NAME		13
+#define	ITEM_3_ICON		23
 #define	ITEM_4_ID			4
 #define	ITEM_4_NAME		14
+#define	ITEM_4_ICON		34
 #define	ITEM_5_ID			5
 #define	ITEM_5_NAME		15
+#define	ITEM_5_ICON		25
 #define	ITEM_6_ID			6
 #define	ITEM_6_NAME		16
+#define	ITEM_6_ICON		26
 #define	ITEM_7_ID			7
 #define	ITEM_7_NAME		17
+#define	ITEM_7_ICON		27
 #define	ITEM_8_ID			8
 #define	ITEM_8_NAME		18
+#define	ITEM_8_ICON		28
 #define	ITEM_9_ID			9
 #define	ITEM_9_NAME		19
+#define	ITEM_9_ICON		29
 #define	ITEM_10_ID		10
 #define	ITEM_10_NAME	20
+#define	ITEM_10_ICON	30
 	
 
 #define ANIM_DURATION 250
@@ -38,10 +48,7 @@
 
 	
 
-
-
-
-#define	MAX_STRINGS 10
+#define	MAX_ITEMS 10
 #define	MAX_STRING_SIZE	50
 	
 
@@ -103,11 +110,14 @@ typedef struct {
 } Context;
 
 
-char venues_names[MAX_STRINGS][MAX_STRING_SIZE]; 
-char venues_ids[MAX_STRINGS][MAX_STRING_SIZE]; 
+char venues_names[MAX_ITEMS][MAX_STRING_SIZE]; 
+char venues_ids[MAX_ITEMS][MAX_STRING_SIZE]; 
+int venues_icons[MAX_ITEMS]; 
 
-char items_names[MAX_STRINGS][MAX_STRING_SIZE]; 
-char items_ids[MAX_STRINGS][MAX_STRING_SIZE]; 
+
+
+char items_names[MAX_ITEMS][MAX_STRING_SIZE]; 
+char items_ids[MAX_ITEMS][MAX_STRING_SIZE]; 
 
 // Main window variables
 static Window *s_main_window;
@@ -221,6 +231,69 @@ static void request_items(char* id_venue) {
 }
 
 
+/**************************************  Dialog Window ***********************************/
+
+
+static Window *s_dialog_main_window;
+static TextLayer *s_dialog_label_layer;
+static BitmapLayer *s_dialog_icon_layer;
+static ActionBarLayer *s_dialog_action_bar_layer;
+
+static GBitmap *s_dialog_icon_bitmap, *s_dialog_tick_bitmap, *s_dialog_cross_bitmap;
+
+static void window_dialog_load(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_bounds(window_layer);
+
+  s_dialog_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_PICK);
+  GRect bitmap_bounds = gbitmap_get_bounds(s_dialog_icon_bitmap);
+
+  s_dialog_icon_layer = bitmap_layer_create(GRect((bounds.size.w / 2) - (bitmap_bounds.size.w / 2) - (ACTION_BAR_WIDTH / 2), 10, bitmap_bounds.size.w, bitmap_bounds.size.h));
+  bitmap_layer_set_bitmap(s_dialog_icon_layer, s_dialog_icon_bitmap);
+  bitmap_layer_set_compositing_mode(s_dialog_icon_layer, GCompOpSet);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_dialog_icon_layer));
+
+  s_dialog_label_layer = text_layer_create(GRect(10, 10 + bitmap_bounds.size.h + 5, 124 - ACTION_BAR_WIDTH, bounds.size.h - (10 + bitmap_bounds.size.h + 15)));
+  text_layer_set_text(s_dialog_label_layer, "Pick object?");
+  text_layer_set_background_color(s_dialog_label_layer, GColorClear);
+  text_layer_set_text_alignment(s_dialog_label_layer, GTextAlignmentCenter);
+  text_layer_set_font(s_dialog_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  layer_add_child(window_layer, text_layer_get_layer(s_dialog_label_layer));
+
+  s_dialog_tick_bitmap = gbitmap_create_with_resource(RESOURCE_ID_TICK);
+  s_dialog_cross_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CROSS);
+
+  s_dialog_action_bar_layer = action_bar_layer_create();
+  action_bar_layer_set_icon(s_dialog_action_bar_layer, BUTTON_ID_UP, s_dialog_tick_bitmap);
+  action_bar_layer_set_icon(s_dialog_action_bar_layer, BUTTON_ID_DOWN, s_dialog_cross_bitmap);
+  action_bar_layer_add_to_window(s_dialog_action_bar_layer, window);
+}
+
+static void window_dialog_unload(Window *window) {
+  text_layer_destroy(s_dialog_label_layer);
+  action_bar_layer_destroy(s_dialog_action_bar_layer);
+  bitmap_layer_destroy(s_dialog_icon_layer);
+
+  gbitmap_destroy(s_dialog_icon_bitmap); 
+  gbitmap_destroy(s_dialog_tick_bitmap);
+  gbitmap_destroy(s_dialog_cross_bitmap);
+
+  window_destroy(window);
+  s_dialog_main_window = NULL;
+}
+
+void dialog_choice_window_push() {
+  if(!s_dialog_main_window) {
+    s_dialog_main_window = window_create();
+    window_set_background_color(s_dialog_main_window, GColorWhite);
+    window_set_window_handlers(s_dialog_main_window, (WindowHandlers) {
+        .load = window_dialog_load,
+        .unload = window_dialog_unload,
+    });
+  }
+  window_stack_push(s_dialog_main_window, true);
+}
+
 
 
 /********************* ANimations *******************/
@@ -280,9 +353,12 @@ static void update_venue_layers (int id) {
 	
 	gbitmap_destroy(s_icon_bitmap);
 	
-	int question=rand()%7;
-	switch(question)
+	//int question=rand()%7;
+	switch(venues_icons[id])
 	{
+		case -1:
+		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_MISTERY);
+		break;
 		case 0:
 		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_VENUE0);
 		break;
@@ -703,7 +779,9 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidas las venues en el Pebble"); 
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
 				strcpy(venues_ids[i-1], dict_find(iter,i)->value->cstring);
-				strcpy(venues_names[i-1], dict_find(iter,i+10)->value->cstring);				
+				strcpy(venues_names[i-1], dict_find(iter,i+10)->value->cstring);	
+				venues_icons[i-1] = dict_find(iter,i+20)->value->int32;
+				
 			}
 			action_menu_unfreeze(s_main_action_menu);
 			#ifdef PBL_PLATFORM_APLITE
@@ -750,6 +828,11 @@ static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResul
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
+
+
+
+
+
 
 /************************************ App *************************************/
 

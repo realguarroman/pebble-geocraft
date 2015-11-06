@@ -18,8 +18,9 @@ function fetchVenues(latitude, longitude) {
 				};			
 				var i;
 				for (i = 1; i <= length; i++) { 
-					dictionary["ITEM_" + i + "_ID"] = response.data.results[i-1].id;
+					dictionary["ITEM_" + i + "_ID"] = response.data.results[i-1].venue_id;
 					dictionary["ITEM_" + i + "_NAME"] = response.data.results[i-1].name;
+					dictionary["ITEM_" + i + "_ICON"] = response.data.results[i-1].index;
 				}				
 				Pebble.sendAppMessage(dictionary);
       } else {
