@@ -3,6 +3,8 @@
         "DATA_LENGTH": 101,
         "DATA_TYPE": 100,
         "FETCH_TYPE": 200,
+        "ID_ITEM": 202,
+        "ID_LOCATION": 203,
         "ID_VENUE": 201,
         "ITEM_10_ICON": 30,
         "ITEM_10_ID": 10,
@@ -33,7 +35,8 @@
         "ITEM_8_NAME": 18,
         "ITEM_9_ICON": 29,
         "ITEM_9_ID": 9,
-        "ITEM_9_NAME": 19
+        "ITEM_9_NAME": 19,
+        "LOCATION_ICON": 204
     },
     "capabilities": [
         "location"

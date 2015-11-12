@@ -44,7 +44,8 @@ function fetchItems(venue_id) {
         var response = JSON.parse(req.responseText);
 				var length =  response.data.objects.length;
 				var slots =  response.data.location_category.slots;
-				
+				var location = response.data.id;
+				var index = response.data.location_category.index;
 			//	console.log('slots');
 			//	console.log(slots);
 				
@@ -53,6 +54,8 @@ function fetchItems(venue_id) {
 				var dictionary = {
 					'DATA_TYPE': 2, //items
 					'DATA_LENGTH': slots,
+					'ID_LOCATION': location,
+					'LOCATION_ICON': index,
 				};			
 				var i;
 				for (i = 1; i <= length; i++) { 
@@ -71,6 +74,61 @@ function fetchItems(venue_id) {
   };
   req.send(null);
 }
+
+
+
+function pickItem(object_id,location_id) {
+  var req = new XMLHttpRequest();
+	console.log('http://geocraft.oshift.net/plugin/geocraft.pick.object?object_id=' + object_id + '&location_id=' + location_id + '&X-BB-SESSION=' + session);
+  req.open('PUT','http://geocraft.oshift.net/plugin/geocraft.pick.object?object_id='  + object_id + '&location_id=' + location_id + '&X-BB-SESSION=' + session, true);
+	req.onload = function () {
+    if (req.readyState === 4) {
+			if (req.status === 200) {
+        console.log(req.responseText);
+      
+				 
+        var response = JSON.parse(req.responseText);
+				var length =  response.data.objects.length;
+				var slots =  response.data.location_category.slots;
+				var location = response.data.id;
+				
+			//	console.log('slots');
+			//	console.log(slots);
+				
+				if (length > 10) length = 10;
+				// Assemble dictionary using our keys
+				var dictionary = {
+					'DATA_TYPE': 3, //pick
+					'DATA_LENGTH': slots,
+					'ID_LOCATION': location,
+				};			
+				var i;
+				for (i = 1; i <= length; i++) { 
+					dictionary["ITEM_" + i + "_ID"] = response.data.objects[i-1].id;
+					dictionary["ITEM_" + i + "_NAME"] = response.data.objects[i-1].object_type.name;
+				}			
+				for (i = length + 1; i <= slots; i++) { 
+					dictionary["ITEM_" + i + "_ID"] = 0;
+					dictionary["ITEM_" + i + "_NAME"] = "empty";
+				}				
+				Pebble.sendAppMessage(dictionary);
+				
+				
+				
+				
+				
+      } else {
+        console.log('Ha habido algun error al coger el objeto');
+				console.log(req.responseText);
+      }
+    }
+  };
+  req.send(null);
+}
+
+
+
+
 
 
 
@@ -106,7 +164,7 @@ Pebble.addEventListener("ready",
 
 													var http = new XMLHttpRequest();
 													var params = '{ "username": "' + Pebble.getAccountToken() + '", "password": "' + Pebble.getWatchToken() + '", "appcode": "1234567890" }';
-												//	var params = '{ "username": "' + 'api' + '", "password": "' + 'apipassword' + '", "appcode": "1234567890" }';
+										//			var params = '{ "username": "' + 'api' + '", "password": "' + 'apipassword' + '", "appcode": "1234567890" }';
 													
 													
 													var http2 = new XMLHttpRequest();
@@ -176,7 +234,8 @@ Pebble.addEventListener('appmessage', function (e) {
 	if (e.payload.FETCH_TYPE == 0) window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
 	//Fetch items from venues
 	if (e.payload.FETCH_TYPE == 1) fetchItems(e.payload.ID_VENUE);
-	
+	//pick item from location
+	if (e.payload.FETCH_TYPE == 2) pickItem(e.payload.ID_ITEM,e.payload.ID_LOCATION);
 	
 //	console.log(JSON.stringify(e.payload));
   console.log(e.payload.FETCH_TYPE);

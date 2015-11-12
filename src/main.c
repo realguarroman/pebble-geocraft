@@ -7,6 +7,9 @@
 #define DATA_LENGTH		101
 #define FETCH_TYPE		200
 #define ID_VENUE  		201
+#define ID_ITEM    		202
+#define ID_LOCATION  	203
+#define LOCATION_ICON 204
 #define	ITEM_1_ID			1
 #define	ITEM_1_NAME		11
 #define	ITEM_1_ICON		21
@@ -163,6 +166,7 @@ static int s_active_venue;
 static int s_active_item;
 static int s_venue_length;
 static int s_item_length;
+static char current_location[MAX_STRING_SIZE];
 
 static bool on_animation;
 
@@ -230,6 +234,20 @@ static void request_items(char* id_venue) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Ítems solicitados"); 
 }
 
+static void pick_item(char* id_item, char* id_location) {
+		//vibes_short_pulse();
+		DictionaryIterator *iter;
+		app_message_outbox_begin(&iter);
+		// Add a key-value pair
+		dict_write_uint8(iter, FETCH_TYPE, 2); // 2 es coger objetos
+  	dict_write_cstring(iter, ID_ITEM, id_item); 
+		dict_write_cstring(iter, ID_LOCATION, id_location); 
+		// Send the message!
+		app_message_outbox_send();
+		APP_LOG(APP_LOG_LEVEL_INFO, "Coger objeto"); 
+}
+
+
 
 /**************************************  Dialog Window ***********************************/
 
@@ -240,6 +258,21 @@ static BitmapLayer *s_dialog_icon_layer;
 static ActionBarLayer *s_dialog_action_bar_layer;
 
 static GBitmap *s_dialog_icon_bitmap, *s_dialog_tick_bitmap, *s_dialog_cross_bitmap;
+
+static void s_dialog_select_down_handler(ClickRecognizerRef recognizer, void *context) {
+	window_stack_remove(s_dialog_main_window, true);
+}
+
+static void s_dialog_select_up_handler(ClickRecognizerRef recognizer, void *context) {
+	pick_item(items_ids[s_active_item], current_location);
+}
+
+static void s_dialog_click_config_provider(void *context) {
+	window_single_click_subscribe(BUTTON_ID_UP, s_dialog_select_up_handler);
+	window_single_click_subscribe(BUTTON_ID_DOWN, s_dialog_select_down_handler);
+}
+
+
 
 static void window_dialog_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
@@ -264,6 +297,7 @@ static void window_dialog_load(Window *window) {
   s_dialog_cross_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CROSS);
 
   s_dialog_action_bar_layer = action_bar_layer_create();
+	action_bar_layer_set_click_config_provider(s_dialog_action_bar_layer, s_dialog_click_config_provider);
   action_bar_layer_set_icon(s_dialog_action_bar_layer, BUTTON_ID_UP, s_dialog_tick_bitmap);
   action_bar_layer_set_icon(s_dialog_action_bar_layer, BUTTON_ID_DOWN, s_dialog_cross_bitmap);
   action_bar_layer_add_to_window(s_dialog_action_bar_layer, window);
@@ -799,6 +833,9 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
 			}
+			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
+	  	venues_icons[s_active_venue]=dict_find(iter,LOCATION_ICON)->value->int32; //por si cambia el icono (al desbloquear sitios)
+	//		APP_LOG(APP_LOG_LEVEL_INFO, dict_find(iter,ID_LOCATION)->value->cstring); 
 			action_menu_unfreeze(s_main_action_menu);
 			#ifdef PBL_PLATFORM_APLITE
 				window_set_fullscreen(s_item_window, true);
@@ -807,9 +844,27 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			s_active_item=0;
   		s_item_length=length;
 			update_item_layers(s_active_item);
+			update_venue_layers(s_active_venue);
 		break;
 		
-		
+		case 3:    		
+			APP_LOG(APP_LOG_LEVEL_INFO, "Recogido un objeto"); 
+			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
+				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
+				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
+			}
+			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
+	//		APP_LOG(APP_LOG_LEVEL_INFO, dict_find(iter,ID_LOCATION)->value->cstring); 
+			action_menu_unfreeze(s_main_action_menu);
+			#ifdef PBL_PLATFORM_APLITE
+				window_set_fullscreen(s_item_window, true);
+			#endif
+	  	window_stack_remove(s_dialog_main_window, true);
+			//window_stack_push(s_item_window, true);
+			s_active_item=0;
+  		s_item_length=length;
+			update_item_layers(s_active_item);
+		break;
 
 	}
 	
