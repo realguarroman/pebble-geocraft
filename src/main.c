@@ -803,6 +803,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 	switch (type_tuple->value->int32) {
 		
 		case 0:
+			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Login exitoso"); 
 			LOGGED_IN = true;
 			gbitmap_destroy(s_ellipsis_bitmap);
@@ -810,7 +811,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 	  	action_bar_layer_set_icon(s_main_action_bar, BUTTON_ID_SELECT, s_ellipsis_bitmap);
 		break;
 		
-		case 1:    		
+		case 1:  
+			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidas las venues en el Pebble"); 
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
 				strcpy(venues_ids[i-1], dict_find(iter,i)->value->cstring);
@@ -828,7 +830,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			update_venue_layers(s_active_venue);
 		break;
 		
-		case 2:    		
+		case 2:  
+			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidos los items en el Pebble"); 
 	  	
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
@@ -849,10 +852,11 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			update_item_layers(s_active_item);
 			update_venue_layers(s_active_venue);
 	  	if (unlock) dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
-	  	dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
+	  	//dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
 		break;
 		
-		case 3:    		
+		case 3:    	
+			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recogido un objeto"); 
 	  	dialog_message_window_push(strcat("You have picked ", items_names[s_active_item]));
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
