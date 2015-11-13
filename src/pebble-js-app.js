@@ -1,9 +1,11 @@
 var session;
+var url = "http://geocraft-sgarcia.itos.redhat.com/";
 
+//var url_old = "http://geocraft.oshift.net/";
 
 function fetchVenues(latitude, longitude) {
   var req = new XMLHttpRequest();
-  req.open('GET', 'http://geocraft.oshift.net/plugin/geocraft.search.locations?ll=' + latitude + ',' + longitude + '&X-BB-SESSION=' + session, true);
+  req.open('GET', url + 'plugin/geocraft.search.locations?ll=' + latitude + ',' + longitude + '&X-BB-SESSION=' + session, true);
 	req.onload = function () {
     if (req.readyState === 4) {
 			if (req.status === 200) {
@@ -35,8 +37,8 @@ function fetchVenues(latitude, longitude) {
 
 function fetchItems(venue_id) {
   var req = new XMLHttpRequest();
-	console.log('http://geocraft.oshift.net/plugin/geocraft.view.location?venue_id=' + venue_id + '&X-BB-SESSION=' + session);
-  req.open('GET','http://geocraft.oshift.net/plugin/geocraft.view.location?venue_id=' + venue_id + '&X-BB-SESSION=' + session, true);
+	console.log(url + 'plugin/geocraft.view.location?venue_id=' + venue_id + '&X-BB-SESSION=' + session);
+  req.open('GET',url + 'plugin/geocraft.view.location?venue_id=' + venue_id + '&X-BB-SESSION=' + session, true);
 	req.onload = function () {
     if (req.readyState === 4) {
 			if (req.status === 200) {
@@ -79,8 +81,8 @@ function fetchItems(venue_id) {
 
 function pickItem(object_id,location_id) {
   var req = new XMLHttpRequest();
-	console.log('http://geocraft.oshift.net/plugin/geocraft.pick.object?object_id=' + object_id + '&location_id=' + location_id + '&X-BB-SESSION=' + session);
-  req.open('PUT','http://geocraft.oshift.net/plugin/geocraft.pick.object?object_id='  + object_id + '&location_id=' + location_id + '&X-BB-SESSION=' + session, true);
+	console.log(url + 'plugin/geocraft.pick.object?object_id=' + object_id + '&location_id=' + location_id + '&X-BB-SESSION=' + session);
+  req.open('PUT', url + 'plugin/geocraft.pick.object?object_id='  + object_id + '&location_id=' + location_id + '&X-BB-SESSION=' + session, true);
 	req.onload = function () {
     if (req.readyState === 4) {
 			if (req.status === 200) {
@@ -170,7 +172,7 @@ Pebble.addEventListener("ready",
 													var http2 = new XMLHttpRequest();
 													var params2 = '{ "username": "' + Pebble.getAccountToken() + '", "password": "' + Pebble.getWatchToken() + '"}';
 													
-													http.open("POST", "http://geocraft.oshift.net/login", true);
+													http.open("POST", url + "login", true);
 
 													//Send the proper header information along with the request
 													http.setRequestHeader("Content-type", "application/json");
@@ -182,7 +184,7 @@ Pebble.addEventListener("ready",
 														//registro
 															
 															
-															http2.open("POST", "http://geocraft.oshift.net/user", true);
+															http2.open("POST", url + "user", true);
 
 															//Send the proper header information along with the request
 															http2.setRequestHeader("Content-type", "application/json");

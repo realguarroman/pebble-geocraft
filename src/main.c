@@ -1,7 +1,7 @@
 #include <pebble.h>
 #include "action_menu.h"
 
-
+#include "dialog.h"
 		
 #define DATA_TYPE			100
 #define DATA_LENGTH		101
@@ -694,9 +694,9 @@ static void init_main_action_menu() {
   s_main_root_level = action_menu_level_create(2);
   
   
-	action_menu_level_add_action (s_main_root_level, "Búsqueda", main_action_performed_callback,
+	action_menu_level_add_action (s_main_root_level, "Search", main_action_performed_callback,
 															  &(Context){.type=ActionTypeFetchVenues,.id="busqueda_id",.name="busqueda_name"});
-	action_menu_level_add_action (s_main_root_level, "Inventario", main_action_performed_callback,
+	action_menu_level_add_action (s_main_root_level, "Inventory", main_action_performed_callback,
 															  &(Context){.type=ActionTypeShowInventory,.id="inventario_id",.name="inventario_name"});
 	
 	
@@ -747,7 +747,7 @@ static void main_window_load(Window *window) {
   action_bar_layer_add_to_window(s_main_action_bar, window);
 
   s_main_label_layer = text_layer_create(GRect(0, 0, bounds.size.w - ACTION_BAR_WIDTH, bounds.size.h));
-  text_layer_set_text(s_main_label_layer, "Bienvenido a GeoCraft");
+  text_layer_set_text(s_main_label_layer, "Welcome to Geocraft");
   text_layer_set_font(s_main_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_text_color(s_main_label_layer, GColorBlack);
   text_layer_set_background_color(s_main_label_layer, GColorClear);
@@ -795,6 +795,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 	
 	Tuple *length_tuple = dict_find(iter,DATA_LENGTH);
 	int length = length_tuple->value->int32;
+	bool unlock = false;
 	Tuple *type_tuple = dict_find(iter,DATA_TYPE);
 	
 	//APP_LOG(APP_LOG_LEVEL_INFO, "Tipo de datos recibidos: %i", type_tuple->value->int32); 
@@ -829,11 +830,13 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 		
 		case 2:    		
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidos los items en el Pebble"); 
+	  	
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
 				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
 			}
 			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
+			if (venues_icons[s_active_venue]==-1) unlock = true;
 	  	venues_icons[s_active_venue]=dict_find(iter,LOCATION_ICON)->value->int32; //por si cambia el icono (al desbloquear sitios)
 	//		APP_LOG(APP_LOG_LEVEL_INFO, dict_find(iter,ID_LOCATION)->value->cstring); 
 			action_menu_unfreeze(s_main_action_menu);
@@ -845,10 +848,13 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
   		s_item_length=length;
 			update_item_layers(s_active_item);
 			update_venue_layers(s_active_venue);
+	  	if (unlock) dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
+	  	dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
 		break;
 		
 		case 3:    		
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recogido un objeto"); 
+	  	dialog_message_window_push(strcat("You have picked ", items_names[s_active_item]));
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
 				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
