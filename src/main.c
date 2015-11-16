@@ -167,6 +167,7 @@ static int s_active_item;
 static int s_venue_length;
 static int s_item_length;
 static char current_location[MAX_STRING_SIZE];
+char* message;
 
 static bool on_animation;
 
@@ -174,6 +175,18 @@ static bool on_animation;
 AppTimer *timer;
 AppTimer *timer2;
 AppTimer *timer3;
+
+
+/******************************* Strings ***************************************/
+char* concat(char *s1, char *s2)
+{
+    char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
+    //in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
 
 /****************************** Animation *************************************************/
 
@@ -851,14 +864,18 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
   		s_item_length=length;
 			update_item_layers(s_active_item);
 			update_venue_layers(s_active_venue);
-	  	if (unlock) dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
-	  	//dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
+	  //	if (unlock) dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
+		//	message = "You have unlocked a place. Congratulations!";
+		//	unlock = true;
+	  	if (unlock) dialog_message_window_push(concat("You have unlocked ", venues_names[s_active_venue]));
+		
+	
 		break;
 		
 		case 3:    	
 			vibes_short_pulse();
-			APP_LOG(APP_LOG_LEVEL_INFO, "Recogido un objeto"); 
-	  	dialog_message_window_push(strcat("You have picked ", items_names[s_active_item]));
+			APP_LOG(APP_LOG_LEVEL_INFO, "Recogido un objeto"); 			
+			dialog_message_window_push(concat("You have picked ", items_names[s_active_item]));
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
 				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	

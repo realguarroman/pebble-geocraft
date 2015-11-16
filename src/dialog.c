@@ -12,7 +12,7 @@ static Layer *s_background_layer;
 AppTimer *timer;
 
 static GBitmap *s_icon_bitmap;
-static char message[80]; 
+char* m;
 
 static void background_update_proc(Layer *layer, GContext *ctx) {
  
@@ -42,13 +42,16 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, bitmap_layer_get_layer(s_icon_layer));
 
   s_label_layer = text_layer_create(GRect(10,  40, 124, 150));
-  text_layer_set_text(s_label_layer, message);
+  text_layer_set_text(s_label_layer, m);
   text_layer_set_background_color(s_label_layer, GColorClear);
   text_layer_set_font(s_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   layer_add_child(window_layer, text_layer_get_layer(s_label_layer));
 }
 
 static void window_unload(Window *window) {
+//	strcpy(message, "\0");
+//	memset(message, '\0', sizeof(message));
+	
   layer_destroy(s_background_layer);
 
   text_layer_destroy(s_label_layer);
@@ -58,14 +61,17 @@ static void window_unload(Window *window) {
 
   window_destroy(window);
   s_main_window = NULL;
+	
 }
 
 void timer_callback(void *data) {
 	 window_stack_remove(s_main_window, true);;
 }
 
-void dialog_message_window_push(char cadena[]) {
-	strcpy(message, cadena);
+void dialog_message_window_push(char* message) {
+	
+	m = message;
+		
   if(!s_main_window) {
     s_main_window = window_create();
     window_set_window_handlers(s_main_window, (WindowHandlers) {
