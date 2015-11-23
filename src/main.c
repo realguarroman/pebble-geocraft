@@ -94,15 +94,10 @@
 
 // Types of actions
 typedef enum {
-  ActionTypeEmpty,
+ 
 	ActionTypeFetchVenues,
-	ActionTypeFetchItems,
-	ActionTypeShowInventory,
-  ActionTypeEnterVenue,
-  ActionTypeEnterItem,
-  ActionTypeGetItem,
-  ActionTypeDropItem,
-  ActionTypeLookItem
+	ActionTypeShowInventory
+
 } ActionType;
 
 // Struct with data about a menu action
@@ -121,6 +116,7 @@ int venues_icons[MAX_ITEMS];
 
 char items_names[MAX_ITEMS][MAX_STRING_SIZE]; 
 char items_ids[MAX_ITEMS][MAX_STRING_SIZE]; 
+int items_icons[MAX_ITEMS]; 
 
 // Main window variables
 static Window *s_main_window;
@@ -225,7 +221,6 @@ void animate_layer(Layer *layer, GRect *start, GRect *finish, int duration, int 
 /****************************** Request Data to JS ****************************************/
 
 static void request_venues(void) {
-		//vibes_short_pulse();
 		DictionaryIterator *iter;
 		app_message_outbox_begin(&iter);
 		// Add a key-value pair
@@ -236,7 +231,6 @@ static void request_venues(void) {
 }
 
 static void request_items(char* id_venue) {
-		//vibes_short_pulse();
 		DictionaryIterator *iter;
 		app_message_outbox_begin(&iter);
 		// Add a key-value pair
@@ -248,7 +242,6 @@ static void request_items(char* id_venue) {
 }
 
 static void pick_item(char* id_item, char* id_location) {
-		//vibes_short_pulse();
 		DictionaryIterator *iter;
 		app_message_outbox_begin(&iter);
 		// Add a key-value pair
@@ -260,7 +253,15 @@ static void pick_item(char* id_item, char* id_location) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Coger objeto"); 
 }
 
-
+static void request_inventory(void) {
+		DictionaryIterator *iter;
+		app_message_outbox_begin(&iter);
+		// Add a key-value pair
+		dict_write_uint8(iter, FETCH_TYPE, 3); // 3 es inventario
+		// Send the message!
+		app_message_outbox_send();
+		APP_LOG(APP_LOG_LEVEL_INFO, "Inventario Solicitado"); 
+}
 
 /**************************************  Dialog Window ***********************************/
 
@@ -373,21 +374,8 @@ void animate_label_down_last(Layer *l) {
 }
 
 
-/****************************** Item  ActionMenu *****************************/
 
-static void item_action_performed_callback(ActionMenu *action_menu, const ActionMenuItem *action, void *context) {
-  // Get data from performed action
-  s_item_action_data = action_menu_item_get_action_data(action);
 
-//  APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_item_action_data->type, s_item_action_data->id, s_item_action_data->name);
-}
-
-static void init_item_action_menu() {
-  // Create the root level
-  s_item_root_level = action_menu_level_create(2);
-  action_menu_level_add_action(s_item_root_level, "Mirar", item_action_performed_callback, NULL);
-  action_menu_level_add_action(s_item_root_level, "Dejar", item_action_performed_callback, NULL);
-}
 
 
 /********************************* Update  Layers **********************************************/
@@ -445,10 +433,6 @@ static void update_item_layers (int id) {
 static void item_select_click_handler(ClickRecognizerRef recognizer, void *context) {
   dialog_choice_window_push();
 }
-
-
-
-
 
 
 
@@ -521,10 +505,6 @@ static void item_window_load(Window *window) {
   text_layer_set_text(s_item_label_layer, "");
   text_layer_set_font(s_item_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_text_color(s_item_label_layer, GColorBlack);
-	
-	
-
-		
 		
   text_layer_set_text_alignment(s_item_label_layer, GTextAlignmentLeft);
   layer_add_child(item_window_layer, text_layer_get_layer(s_item_label_layer));
@@ -561,14 +541,13 @@ static void venue_select_click_handler(ClickRecognizerRef recognizer, void *cont
   request_items(venues_ids[s_active_venue]);
 }
 
-
-
 void timer_callback_up(void *data) {
 	update_venue_layers(s_active_venue);
 	animate_label_up_last(text_layer_get_layer(s_venue_label_layer));
 	animate_label_up_last(text_layer_get_layer(s_venue_pagination_layer));
 	animate_label_up_last(bitmap_layer_get_layer(s_venue_icon_layer));
 }
+
 void timer_callback_down(void *data) {
 	update_venue_layers(s_active_venue);
 	animate_label_down_last(text_layer_get_layer(s_venue_label_layer));
@@ -672,30 +651,17 @@ static void main_action_performed_callback(ActionMenu *action_menu, const Action
   APP_LOG(APP_LOG_LEVEL_INFO, "Type: %d, Id: %s, Name %s", s_main_action_data->type, s_main_action_data->id, s_main_action_data->name);
   switch (s_main_action_data->type) {
 		
-		 case ActionTypeFetchVenues: 
-      request_venues();
+		case ActionTypeFetchVenues: 
+    	request_venues();
 			action_menu_freeze(s_main_action_menu); 
-      break;
+    break;
+	
+		case ActionTypeShowInventory: 
+      request_inventory();
+			action_menu_freeze(s_main_action_menu); 
+    break;
 		
-		
-		 case ActionTypeFetchItems: 
-     // request_items(s_main_action_data->id);
-		//	action_menu_freeze(s_venue_action_menu); 
-      break;
-		
-    case ActionTypeEnterVenue: 
-      APP_LOG(APP_LOG_LEVEL_INFO, "Accediendo a la venue %s (id => %s)", s_main_action_data->name, s_main_action_data->id);
-      action_menu_freeze(s_main_action_menu);
-      window_stack_push(s_venue_window, true);
-
-      break;
-    case ActionTypeEnterItem: 
-      APP_LOG(APP_LOG_LEVEL_INFO, "Accediendo al objeto %s (id => %s)", s_main_action_data->name, s_main_action_data->id);
-      action_menu_freeze(s_main_action_menu);
-      window_stack_push(s_item_window, true);
-      break;
-    default:
-      break;
+   
   }
 }
 
@@ -761,7 +727,7 @@ static void main_window_load(Window *window) {
 
   s_main_label_layer = text_layer_create(GRect(0, 0, bounds.size.w - ACTION_BAR_WIDTH, bounds.size.h));
   text_layer_set_text(s_main_label_layer, "Welcome to Geocraft");
-  text_layer_set_font(s_main_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_font(s_main_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_text_color(s_main_label_layer, GColorBlack);
   text_layer_set_background_color(s_main_label_layer, GColorClear);
   text_layer_set_text_alignment(s_main_label_layer, GTextAlignmentCenter);
@@ -830,8 +796,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
 				strcpy(venues_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(venues_names[i-1], dict_find(iter,i+10)->value->cstring);	
-				venues_icons[i-1] = dict_find(iter,i+20)->value->int32;
-				
+				venues_icons[i-1] = dict_find(iter,i+20)->value->int32;			
 			}
 			action_menu_unfreeze(s_main_action_menu);
 			#ifdef PBL_PLATFORM_APLITE
@@ -845,8 +810,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 		
 		case 2:  
 			vibes_short_pulse();
-			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidos los items en el Pebble"); 
-	  	
+			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidos los items en el Pebble"); 	
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
 				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
@@ -854,8 +818,6 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
 			if (venues_icons[s_active_venue]==-1) unlock = true;
 	  	venues_icons[s_active_venue]=dict_find(iter,LOCATION_ICON)->value->int32; //por si cambia el icono (al desbloquear sitios)
-	//		APP_LOG(APP_LOG_LEVEL_INFO, dict_find(iter,ID_LOCATION)->value->cstring); 
-			action_menu_unfreeze(s_main_action_menu);
 			#ifdef PBL_PLATFORM_APLITE
 				window_set_fullscreen(s_item_window, true);
 			#endif
@@ -864,9 +826,6 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
   		s_item_length=length;
 			update_item_layers(s_active_item);
 			update_venue_layers(s_active_venue);
-	  //	if (unlock) dialog_message_window_push(strcat("You have unlocked ", venues_names[s_active_venue]));
-		//	message = "You have unlocked a place. Congratulations!";
-		//	unlock = true;
 	  	if (unlock) dialog_message_window_push(concat("You have unlocked ", venues_names[s_active_venue]));
 		
 	
@@ -881,16 +840,32 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
 			}
 			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
-	//		APP_LOG(APP_LOG_LEVEL_INFO, dict_find(iter,ID_LOCATION)->value->cstring); 
-			action_menu_unfreeze(s_main_action_menu);
 			#ifdef PBL_PLATFORM_APLITE
 				window_set_fullscreen(s_item_window, true);
 			#endif
-	  	window_stack_remove(s_dialog_main_window, true);
-			//window_stack_push(s_item_window, true);
+		  window_stack_remove(s_dialog_main_window, true);
 			s_active_item=0;
   		s_item_length=length;
 			update_item_layers(s_active_item);
+		break;
+		
+		
+		case 4:    	
+			vibes_short_pulse();
+			APP_LOG(APP_LOG_LEVEL_INFO, "Recogido inventario"); 			
+			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
+				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
+				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
+				items_icons[i-1] = dict_find(iter,i+20)->value->int32;
+			
+				#ifdef PBL_PLATFORM_APLITE
+					window_set_fullscreen(s_item_window, true);
+				#endif
+				window_stack_push(s_item_window, true);
+				s_active_item=0;
+				s_item_length=length;
+				update_item_layers(s_active_item);
+			}
 		break;
 
 	}

@@ -134,6 +134,43 @@ function pickItem(object_id,location_id) {
 
 
 
+function inventory() {
+  var req = new XMLHttpRequest();
+	console.log(url + 'plugin/geocraft.view.user?X-BB-SESSION=' + session);
+  req.open('GET', url + 'plugin/geocraft.view.user?X-BB-SESSION=' + session, true);
+	req.onload = function () {
+    if (req.readyState === 4) {
+			if (req.status === 200) {
+        console.log(req.responseText);
+        var response = JSON.parse(req.responseText);
+				var length =  response.data.visibleByTheUser.objects.length;			
+				
+		//		if (length > 10) length = 10; limitamos el inventario?
+				// Assemble dictionary using our keys
+				if (length > 10) length = 10;
+				var dictionary = {
+					'DATA_TYPE': 4, //inventory
+					'DATA_LENGTH': length,
+				};			
+				var i;
+				for (i = 1; i <= length; i++) { 
+					dictionary["ITEM_" + i + "_ID"] = response.data.visibleByTheUser.objects[i-1].id;
+					dictionary["ITEM_" + i + "_NAME"] = response.data.visibleByTheUser.objects[i-1].object_type.name;
+					dictionary["ITEM_" + i + "_ICON"] = response.data.visibleByTheUser.objects[i-1].object_type.index;
+				}			
+				Pebble.sendAppMessage(dictionary);
+      } else {
+        console.log('Error');
+      }
+    }
+  };
+  req.send(null);
+}
+
+
+
+
+
 
 
 function locationSuccess(pos) {
@@ -238,6 +275,8 @@ Pebble.addEventListener('appmessage', function (e) {
 	if (e.payload.FETCH_TYPE == 1) fetchItems(e.payload.ID_VENUE);
 	//pick item from location
 	if (e.payload.FETCH_TYPE == 2) pickItem(e.payload.ID_ITEM,e.payload.ID_LOCATION);
+	//inventory
+	if (e.payload.FETCH_TYPE == 3) inventory();
 	
 //	console.log(JSON.stringify(e.payload));
   console.log(e.payload.FETCH_TYPE);
