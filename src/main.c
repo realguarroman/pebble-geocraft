@@ -13,33 +13,43 @@
 #define	ITEM_1_ID			1
 #define	ITEM_1_NAME		11
 #define	ITEM_1_ICON		21
+#define	ITEM_1_CAT		31
 #define	ITEM_2_ID			2
 #define	ITEM_2_NAME		12
 #define	ITEM_2_ICON		22
+#define	ITEM_2_CAT		32
 #define	ITEM_3_ID			3
 #define	ITEM_3_NAME		13
 #define	ITEM_3_ICON		23
+#define	ITEM_3_CAT		33
 #define	ITEM_4_ID			4
 #define	ITEM_4_NAME		14
-#define	ITEM_4_ICON		34
+#define	ITEM_4_ICON		24
+#define	ITEM_4_CAT		34
 #define	ITEM_5_ID			5
 #define	ITEM_5_NAME		15
 #define	ITEM_5_ICON		25
+#define	ITEM_5_CAT		35
 #define	ITEM_6_ID			6
 #define	ITEM_6_NAME		16
 #define	ITEM_6_ICON		26
+#define	ITEM_6_CAT		36
 #define	ITEM_7_ID			7
 #define	ITEM_7_NAME		17
 #define	ITEM_7_ICON		27
+#define	ITEM_7_CAT		37
 #define	ITEM_8_ID			8
 #define	ITEM_8_NAME		18
 #define	ITEM_8_ICON		28
+#define	ITEM_8_CAT		38
 #define	ITEM_9_ID			9
 #define	ITEM_9_NAME		19
 #define	ITEM_9_ICON		29
+#define	ITEM_9_CAT		39
 #define	ITEM_10_ID		10
 #define	ITEM_10_NAME	20
 #define	ITEM_10_ICON	30
+#define	ITEM_10_CAT		40
 	
 
 #define ANIM_DURATION 250
@@ -72,6 +82,11 @@
 	#define LABEL_PAGINATION_WIDTH 50
 	#define LABEL_PAGINATION_HEIGHT 25
 
+  #define LABEL_CAT_X 35
+	#define LABEL_CAT_Y 130
+	#define LABEL_CAT_WIDTH 21
+	#define LABEL_CAT_HEIGHT 21
+
 #else
 
 	#define LABEL_NAME_X 5
@@ -88,6 +103,11 @@
 	#define LABEL_PAGINATION_Y 130
 	#define LABEL_PAGINATION_WIDTH 50
 	#define LABEL_PAGINATION_HEIGHT 25
+
+  #define LABEL_CAT_X 5
+	#define LABEL_CAT_Y 130
+	#define LABEL_CAT_WIDTH 21
+	#define LABEL_CAT_HEIGHT 21
 
 #endif
 
@@ -117,6 +137,7 @@ int venues_icons[MAX_ITEMS];
 char items_names[MAX_ITEMS][MAX_STRING_SIZE]; 
 char items_ids[MAX_ITEMS][MAX_STRING_SIZE]; 
 int items_icons[MAX_ITEMS]; 
+int items_cat[MAX_ITEMS]; 
 
 // Main window variables
 static Window *s_main_window;
@@ -148,6 +169,7 @@ static Window *s_item_window;
 static TextLayer *s_item_label_layer;
 static ActionBarLayer *s_item_action_bar;
 static BitmapLayer *s_item_icon_layer;
+static BitmapLayer *s_item_cat_layer;
 static TextLayer *s_item_pagination_layer;
 
 static ActionMenu *s_item_action_menu;
@@ -155,7 +177,7 @@ static ActionMenuLevel *s_item_root_level, *s_item_inventory_level, *s_item_item
 static Context *s_item_action_data;
 
 // Other variables
-static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap, *s_icon_bitmap;
+static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap, *s_icon_bitmap, *s_cat_bitmap;
 static BitmapLayer *s_logoFSQ_layer;
 static bool LOGGED_IN = false;
 static int s_active_venue;
@@ -425,6 +447,30 @@ static void update_item_layers (int id) {
 	snprintf(pagination, sizeof(pagination), "%d/%d", s_active_item+1, s_item_length);
 	text_layer_set_text(s_item_label_layer, items_names[id]);
 	text_layer_set_text(s_item_pagination_layer, pagination);
+	gbitmap_destroy(s_cat_bitmap);
+	switch(items_cat[id])
+	{
+	
+		case 0:
+			s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_COMMON);
+		break;
+		case 1:
+			s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_RARE);
+		break;
+		case 2:
+			s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_EPIC);
+		break;
+		case 3:
+			s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_LEGEND);
+		break;
+		case -1:
+			s_cat_bitmap =  NULL;
+		break;
+	
+	
+	}
+	bitmap_layer_set_bitmap(s_item_cat_layer, s_cat_bitmap);
+	
 }
 
 
@@ -440,11 +486,14 @@ void timer2_callback_up(void *data) {
 	update_item_layers(s_active_item);
 	animate_label_up_last(text_layer_get_layer(s_item_label_layer));
 	animate_label_up_last(text_layer_get_layer(s_item_pagination_layer));
+	animate_label_up_last(bitmap_layer_get_layer(s_item_cat_layer));
+
 }
 void timer2_callback_down(void *data) {
 	update_item_layers(s_active_item);
 	animate_label_down_last(text_layer_get_layer(s_item_label_layer));
 	animate_label_down_last(text_layer_get_layer(s_item_pagination_layer));
+	animate_label_down_last(bitmap_layer_get_layer(s_item_cat_layer));
 }
 void timer3_callback(void *data) {
 	on_animation=false;
@@ -457,6 +506,7 @@ static void item_select_up_handler(ClickRecognizerRef recognizer, void *context)
 			timer3 = app_timer_register(ANIM_DURATION * 2, (AppTimerCallback) timer3_callback, NULL);
 			animate_label_up_first(text_layer_get_layer(s_item_label_layer));
 			animate_label_up_first(text_layer_get_layer(s_item_pagination_layer));
+			animate_label_up_first(bitmap_layer_get_layer(s_item_cat_layer));
 			s_active_item=s_active_item-1;
 			timer = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer2_callback_up, NULL);
 		}
@@ -470,6 +520,7 @@ static void item_select_down_handler(ClickRecognizerRef recognizer, void *contex
 			timer3 = app_timer_register(ANIM_DURATION * 2, (AppTimerCallback) timer3_callback, NULL);
 			animate_label_down_first(text_layer_get_layer(s_item_label_layer));
 			animate_label_down_first(text_layer_get_layer(s_item_pagination_layer));
+			animate_label_down_first(bitmap_layer_get_layer(s_item_cat_layer));
 			s_active_item=s_active_item+1;
 			timer2 = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer2_callback_down, NULL);
 		}
@@ -516,6 +567,12 @@ static void item_window_load(Window *window) {
   text_layer_set_text_alignment(s_item_pagination_layer, GTextAlignmentCenter);
   layer_add_child(item_window_layer, text_layer_get_layer(s_item_pagination_layer));
 	
+	s_item_cat_layer= bitmap_layer_create(GRect(LABEL_CAT_X, LABEL_CAT_Y, LABEL_CAT_WIDTH, LABEL_CAT_HEIGHT));
+  s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_COMMON);
+	bitmap_layer_set_bitmap(s_item_cat_layer, s_cat_bitmap);
+	layer_add_child(item_window_layer, bitmap_layer_get_layer(s_item_cat_layer));
+	
+	
 	#ifdef PBL_COLOR
 		window_set_background_color(window, GColorCyan);
 		text_layer_set_background_color(s_item_label_layer, GColorCyan);
@@ -530,6 +587,7 @@ static void item_window_unload(Window *window) {
   text_layer_destroy(s_item_label_layer);
 	text_layer_destroy(s_item_pagination_layer);
   action_bar_layer_destroy(s_item_action_bar);
+	bitmap_layer_destroy(s_item_cat_layer);
   action_menu_unfreeze(s_main_action_menu);
 }
 
@@ -814,6 +872,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
 				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
+				items_icons[i-1] = dict_find(iter,i+20)->value->int32;
+				items_cat[i-1] = dict_find(iter,i+30)->value->int32;
 			}
 			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
 			if (venues_icons[s_active_venue]==-1) unlock = true;
@@ -857,7 +917,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
 				items_icons[i-1] = dict_find(iter,i+20)->value->int32;
-			
+			  items_cat[i-1] = dict_find(iter,i+30)->value->int32;
 				#ifdef PBL_PLATFORM_APLITE
 					window_set_fullscreen(s_item_window, true);
 				#endif

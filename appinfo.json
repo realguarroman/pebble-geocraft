@@ -6,33 +6,43 @@
         "ID_ITEM": 202,
         "ID_LOCATION": 203,
         "ID_VENUE": 201,
+        "ITEM_10_CAT": 40,
         "ITEM_10_ICON": 30,
         "ITEM_10_ID": 10,
         "ITEM_10_NAME": 20,
+        "ITEM_1_CAT": 31,
         "ITEM_1_ICON": 21,
         "ITEM_1_ID": 1,
         "ITEM_1_NAME": 11,
+        "ITEM_2_CAT": 32,
         "ITEM_2_ICON": 22,
         "ITEM_2_ID": 2,
         "ITEM_2_NAME": 12,
+        "ITEM_3_CAT": 33,
         "ITEM_3_ICON": 23,
         "ITEM_3_ID": 3,
         "ITEM_3_NAME": 13,
+        "ITEM_4_CAT": 34,
         "ITEM_4_ICON": 24,
         "ITEM_4_ID": 4,
         "ITEM_4_NAME": 14,
+        "ITEM_5_CAT": 35,
         "ITEM_5_ICON": 25,
         "ITEM_5_ID": 5,
         "ITEM_5_NAME": 15,
+        "ITEM_6_CAT": 36,
         "ITEM_6_ICON": 26,
         "ITEM_6_ID": 6,
         "ITEM_6_NAME": 16,
+        "ITEM_7_CAT": 37,
         "ITEM_7_ICON": 27,
         "ITEM_7_ID": 7,
         "ITEM_7_NAME": 17,
+        "ITEM_8_CAT": 38,
         "ITEM_8_ICON": 28,
         "ITEM_8_ID": 8,
         "ITEM_8_NAME": 18,
+        "ITEM_9_CAT": 39,
         "ITEM_9_ICON": 29,
         "ITEM_9_ID": 9,
         "ITEM_9_NAME": 19,
@@ -46,6 +56,46 @@
     "projectType": "native",
     "resources": {
         "media": [
+            {
+                "file": "images/legendary_item.png",
+                "name": "LEGEND",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/epic_item.png",
+                "name": "EPIC",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/rare_item.png",
+                "name": "RARE",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/common_item.png",
+                "name": "COMMON",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
             {
                 "file": "images/warning.png",
                 "name": "WARNING",
