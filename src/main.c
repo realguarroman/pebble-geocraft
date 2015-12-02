@@ -77,6 +77,11 @@
 	#define LABEL_ICON_WIDTH 56
 	#define LABEL_ICON_HEIGHT 65
 
+  #define LABEL_ITEM_ICON_X 32
+	#define LABEL_ITEM_ICON_Y 64
+	#define LABEL_ITEM_ICON_WIDTH 50
+	#define LABEL_ITEM_ICON_HEIGHT 50
+
 	#define LABEL_PAGINATION_X 93
 	#define LABEL_PAGINATION_Y 130
 	#define LABEL_PAGINATION_WIDTH 50
@@ -98,6 +103,11 @@
 	#define LABEL_ICON_Y 93
 	#define LABEL_ICON_WIDTH 56
 	#define LABEL_ICON_HEIGHT 65
+
+  #define LABEL_ITEM_ICON_X 32
+	#define LABEL_ITEM_ICON_Y 64
+	#define LABEL_ITEM_ICON_WIDTH 50
+	#define LABEL_ITEM_ICON_HEIGHT 50
 
 	#define LABEL_PAGINATION_X 63
 	#define LABEL_PAGINATION_Y 130
@@ -177,7 +187,7 @@ static ActionMenuLevel *s_item_root_level, *s_item_inventory_level, *s_item_item
 static Context *s_item_action_data;
 
 // Other variables
-static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap, *s_icon_bitmap, *s_cat_bitmap;
+static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap, *s_icon_bitmap, *s_cat_bitmap, *s_item_icon_bitmap;
 static BitmapLayer *s_logoFSQ_layer;
 static bool LOGGED_IN = false;
 static int s_active_venue;
@@ -473,6 +483,32 @@ static void update_item_layers (int id) {
 	}
 	bitmap_layer_set_bitmap(s_item_cat_layer, s_cat_bitmap);
 	
+	
+	APP_LOG(APP_LOG_LEVEL_INFO, "Icono item: %d", items_icons[id]);
+	
+	gbitmap_destroy(s_item_icon_bitmap);
+	s_item_icon_bitmap = NULL;
+	switch(items_icons[id])
+	{
+	
+		case 1:
+			s_item_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ITEM001);
+		break;
+		case 2:
+			s_item_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ITEM002);
+		break;
+		case 3:
+			s_item_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ITEM003);
+		break;
+		case 4:
+			s_item_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ITEM004);
+		break;
+		
+		
+	
+	
+	}
+	bitmap_layer_set_bitmap(s_item_icon_layer, s_item_icon_bitmap);
 }
 
 
@@ -489,6 +525,7 @@ void timer2_callback_up(void *data) {
 	animate_label_up_last(text_layer_get_layer(s_item_label_layer),LABEL_NAME_Y);
 	animate_label_up_last(text_layer_get_layer(s_item_pagination_layer),LABEL_PAGINATION_Y);
 	animate_label_up_last(bitmap_layer_get_layer(s_item_cat_layer),LABEL_CAT_Y);
+	animate_label_up_last(bitmap_layer_get_layer(s_item_icon_layer),LABEL_ITEM_ICON_Y);
 
 }
 void timer2_callback_down(void *data) {
@@ -496,6 +533,7 @@ void timer2_callback_down(void *data) {
 	animate_label_down_last(text_layer_get_layer(s_item_label_layer),LABEL_NAME_Y);
 	animate_label_down_last(text_layer_get_layer(s_item_pagination_layer),LABEL_PAGINATION_Y);
 	animate_label_down_last(bitmap_layer_get_layer(s_item_cat_layer),LABEL_CAT_Y);
+	animate_label_down_last(bitmap_layer_get_layer(s_item_icon_layer),LABEL_ITEM_ICON_Y);
 }
 void timer3_callback(void *data) {
 	on_animation=false;
@@ -509,6 +547,7 @@ static void item_select_up_handler(ClickRecognizerRef recognizer, void *context)
 			animate_label_up_first(text_layer_get_layer(s_item_label_layer));
 			animate_label_up_first(text_layer_get_layer(s_item_pagination_layer));
 			animate_label_up_first(bitmap_layer_get_layer(s_item_cat_layer));
+			animate_label_up_first(bitmap_layer_get_layer(s_item_icon_layer));
 			s_active_item=s_active_item-1;
 			timer = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer2_callback_up, NULL);
 		}
@@ -523,6 +562,7 @@ static void item_select_down_handler(ClickRecognizerRef recognizer, void *contex
 			animate_label_down_first(text_layer_get_layer(s_item_label_layer));
 			animate_label_down_first(text_layer_get_layer(s_item_pagination_layer));
 			animate_label_down_first(bitmap_layer_get_layer(s_item_cat_layer));
+			animate_label_down_first(bitmap_layer_get_layer(s_item_icon_layer));
 			s_active_item=s_active_item+1;
 			timer2 = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer2_callback_down, NULL);
 		}
@@ -574,6 +614,15 @@ static void item_window_load(Window *window) {
 	bitmap_layer_set_bitmap(s_item_cat_layer, s_cat_bitmap);
 	layer_add_child(item_window_layer, bitmap_layer_get_layer(s_item_cat_layer));
 	
+	s_item_icon_layer= bitmap_layer_create(GRect(LABEL_ITEM_ICON_X, LABEL_ITEM_ICON_Y, LABEL_ITEM_ICON_WIDTH, LABEL_ITEM_ICON_HEIGHT));
+  s_item_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ITEM001);
+	bitmap_layer_set_bitmap(s_item_icon_layer, s_item_icon_bitmap);
+	layer_add_child(item_window_layer, bitmap_layer_get_layer(s_item_icon_layer));
+	
+	#ifdef PBL_COLOR
+		bitmap_layer_set_compositing_mode(s_item_icon_layer, GCompOpSet);
+	#endif
+	
 	
 	#ifdef PBL_COLOR
 		window_set_background_color(window, GColorCyan);
@@ -590,6 +639,7 @@ static void item_window_unload(Window *window) {
 	text_layer_destroy(s_item_pagination_layer);
   action_bar_layer_destroy(s_item_action_bar);
 	bitmap_layer_destroy(s_item_cat_layer);
+	bitmap_layer_destroy(s_item_icon_layer);
   action_menu_unfreeze(s_main_action_menu);
 }
 

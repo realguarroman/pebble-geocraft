@@ -57,6 +57,41 @@
     "resources": {
         "media": [
             {
+                "file": "images/004_wood.png",
+                "name": "ITEM004",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/003_stone.png",
+                "name": "ITEM003",
+                "type": "png"
+            },
+            {
+                "file": "images/002_water.png",
+                "name": "ITEM002",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/001_land.png",
+                "name": "ITEM001",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
                 "file": "images/legendary_item.png",
                 "name": "LEGEND",
                 "targetPlatforms": [
