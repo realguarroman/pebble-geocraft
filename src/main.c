@@ -77,7 +77,7 @@
 	#define LABEL_ICON_WIDTH 56
 	#define LABEL_ICON_HEIGHT 65
 
-  #define LABEL_ITEM_ICON_X 32
+  #define LABEL_ITEM_ICON_X 62
 	#define LABEL_ITEM_ICON_Y 64
 	#define LABEL_ITEM_ICON_WIDTH 50
 	#define LABEL_ITEM_ICON_HEIGHT 50
@@ -92,11 +92,16 @@
 	#define LABEL_CAT_WIDTH 21
 	#define LABEL_CAT_HEIGHT 21
 
+  #define LABEL_CARD_X 0
+	#define LABEL_CARD_Y 0
+	#define LABEL_CARD_WIDTH 114
+	#define LABEL_CARD_HEIGHT 168
+
 #else
 
-	#define LABEL_NAME_X 5
-	#define LABEL_NAME_Y 0
-	#define LABEL_NAME_WIDTH 103
+	#define LABEL_NAME_X 6
+	#define LABEL_NAME_Y 5
+	#define LABEL_NAME_WIDTH 100
 	#define LABEL_NAME_HEIGHT 75
 
 	#define LABEL_ICON_X 5
@@ -109,15 +114,20 @@
 	#define LABEL_ITEM_ICON_WIDTH 50
 	#define LABEL_ITEM_ICON_HEIGHT 50
 
-	#define LABEL_PAGINATION_X 63
+	#define LABEL_PAGINATION_X 55
 	#define LABEL_PAGINATION_Y 130
 	#define LABEL_PAGINATION_WIDTH 50
 	#define LABEL_PAGINATION_HEIGHT 25
 
-  #define LABEL_CAT_X 5
-	#define LABEL_CAT_Y 130
+  #define LABEL_CAT_X 7
+	#define LABEL_CAT_Y 140
 	#define LABEL_CAT_WIDTH 21
 	#define LABEL_CAT_HEIGHT 21
+
+  #define LABEL_CARD_X 0
+	#define LABEL_CARD_Y 0
+	#define LABEL_CARD_WIDTH 114
+	#define LABEL_CARD_HEIGHT 168
 
 #endif
 
@@ -180,14 +190,16 @@ static TextLayer *s_item_label_layer;
 static ActionBarLayer *s_item_action_bar;
 static BitmapLayer *s_item_icon_layer;
 static BitmapLayer *s_item_cat_layer;
+static BitmapLayer *s_card_layer;
 static TextLayer *s_item_pagination_layer;
+
 
 static ActionMenu *s_item_action_menu;
 static ActionMenuLevel *s_item_root_level, *s_item_inventory_level, *s_item_items_level;
 static Context *s_item_action_data;
 
 // Other variables
-static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap, *s_icon_bitmap, *s_cat_bitmap, *s_item_icon_bitmap;
+static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap, *s_icon_bitmap, *s_cat_bitmap, *s_item_icon_bitmap, *s_card_bitmap;
 static BitmapLayer *s_logoFSQ_layer;
 static bool LOGGED_IN = false;
 static int s_active_venue;
@@ -592,7 +604,19 @@ static void item_window_load(Window *window) {
 	action_bar_layer_set_icon(s_item_action_bar, BUTTON_ID_UP, s_up_bitmap);
 	action_bar_layer_set_icon(s_item_action_bar, BUTTON_ID_DOWN, s_down_bitmap);
   action_bar_layer_add_to_window(s_item_action_bar, window);
+	
+	
 
+	
+	s_card_layer= bitmap_layer_create(GRect(LABEL_CARD_X, LABEL_CARD_Y, LABEL_CARD_WIDTH, LABEL_CARD_HEIGHT));
+  s_card_bitmap = gbitmap_create_with_resource(RESOURCE_ID_CARD);
+	bitmap_layer_set_bitmap(s_card_layer, s_card_bitmap);
+	layer_add_child(item_window_layer, bitmap_layer_get_layer(s_card_layer));
+	
+	#ifdef PBL_COLOR
+		bitmap_layer_set_compositing_mode(s_card_layer, GCompOpSet);
+	#endif
+	
  
   s_item_label_layer = text_layer_create(GRect(LABEL_NAME_X,LABEL_NAME_Y,LABEL_NAME_WIDTH,LABEL_NAME_HEIGHT));
   text_layer_set_text(s_item_label_layer, "");
@@ -640,6 +664,7 @@ static void item_window_unload(Window *window) {
   action_bar_layer_destroy(s_item_action_bar);
 	bitmap_layer_destroy(s_item_cat_layer);
 	bitmap_layer_destroy(s_item_icon_layer);
+	bitmap_layer_destroy(s_card_layer);
   action_menu_unfreeze(s_main_action_menu);
 }
 

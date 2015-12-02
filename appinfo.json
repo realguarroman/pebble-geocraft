@@ -57,6 +57,16 @@
     "resources": {
         "media": [
             {
+                "file": "images/card.png",
+                "name": "CARD",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
                 "file": "images/004_wood.png",
                 "name": "ITEM004",
                 "targetPlatforms": [
