@@ -52,7 +52,7 @@
 #define	ITEM_10_CAT		40
 	
 
-#define ANIM_DURATION 250
+#define ANIM_DURATION 180
 	
 
 
@@ -370,28 +370,30 @@ void dialog_choice_window_push() {
 
 void animate_label_up_first(Layer *l) {
 	GRect a = layer_get_frame(l);
-	GRect b = GRect(a.origin.x,a.origin.y + OFFSET_Y + 1,a.size.w,a.size.h);
+	
+  
+	GRect b = GRect(a.origin.x,a.origin.y + OFFSET_Y,a.size.w,a.size.h);
   animate_layer(l, &a, &b, ANIM_DURATION, 0);
 
 }
 
-void animate_label_up_last(Layer *l) {
+void animate_label_up_last(Layer *l, int y) {
 	GRect a = layer_get_frame(l);
-	GRect b = GRect(a.origin.x,a.origin.x - OFFSET_Y - OFFSET_Y,a.size.w,a.size.h);
-	GRect c = GRect(a.origin.x,a.origin.y - OFFSET_Y,a.size.w,a.size.h);
+	GRect b = GRect(a.origin.x,a.origin.y - OFFSET_Y - OFFSET_Y,a.size.w,a.size.h);
+	GRect c = GRect(a.origin.x,y,a.size.w,a.size.h);
   animate_layer(l, &b, &c, ANIM_DURATION, 0);
 }
 	
 void animate_label_down_first(Layer *l) {
 	GRect a = layer_get_frame(l);
-	GRect b = GRect(a.origin.x,a.origin.y - OFFSET_Y - 1,a.size.w,a.size.h);
+	GRect b = GRect(a.origin.x,a.origin.y - OFFSET_Y,a.size.w,a.size.h);
   animate_layer(l, &a, &b, ANIM_DURATION, 0);
 }
 
-void animate_label_down_last(Layer *l) {
+void animate_label_down_last(Layer *l, int y) {
 	GRect a = layer_get_frame(l);
 	GRect b = GRect(a.origin.x,a.origin.y + OFFSET_Y + OFFSET_Y,a.size.w,a.size.h);
-	GRect c = GRect(a.origin.x,a.origin.y + OFFSET_Y,a.size.w,a.size.h);
+	GRect c = GRect(a.origin.x,y,a.size.w,a.size.h);
   animate_layer(l, &b, &c, ANIM_DURATION, 0);
 }
 
@@ -451,16 +453,16 @@ static void update_item_layers (int id) {
 	switch(items_cat[id])
 	{
 	
-		case 0:
+		case 1:
 			s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_COMMON);
 		break;
-		case 1:
+		case 2:
 			s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_RARE);
 		break;
-		case 2:
+		case 3:
 			s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_EPIC);
 		break;
-		case 3:
+		case 4:
 			s_cat_bitmap = gbitmap_create_with_resource(RESOURCE_ID_LEGEND);
 		break;
 		case -1:
@@ -484,16 +486,16 @@ static void item_select_click_handler(ClickRecognizerRef recognizer, void *conte
 
 void timer2_callback_up(void *data) {
 	update_item_layers(s_active_item);
-	animate_label_up_last(text_layer_get_layer(s_item_label_layer));
-	animate_label_up_last(text_layer_get_layer(s_item_pagination_layer));
-	animate_label_up_last(bitmap_layer_get_layer(s_item_cat_layer));
+	animate_label_up_last(text_layer_get_layer(s_item_label_layer),LABEL_NAME_Y);
+	animate_label_up_last(text_layer_get_layer(s_item_pagination_layer),LABEL_PAGINATION_Y);
+	animate_label_up_last(bitmap_layer_get_layer(s_item_cat_layer),LABEL_CAT_Y);
 
 }
 void timer2_callback_down(void *data) {
 	update_item_layers(s_active_item);
-	animate_label_down_last(text_layer_get_layer(s_item_label_layer));
-	animate_label_down_last(text_layer_get_layer(s_item_pagination_layer));
-	animate_label_down_last(bitmap_layer_get_layer(s_item_cat_layer));
+	animate_label_down_last(text_layer_get_layer(s_item_label_layer),LABEL_NAME_Y);
+	animate_label_down_last(text_layer_get_layer(s_item_pagination_layer),LABEL_PAGINATION_Y);
+	animate_label_down_last(bitmap_layer_get_layer(s_item_cat_layer),LABEL_CAT_Y);
 }
 void timer3_callback(void *data) {
 	on_animation=false;
@@ -601,16 +603,16 @@ static void venue_select_click_handler(ClickRecognizerRef recognizer, void *cont
 
 void timer_callback_up(void *data) {
 	update_venue_layers(s_active_venue);
-	animate_label_up_last(text_layer_get_layer(s_venue_label_layer));
-	animate_label_up_last(text_layer_get_layer(s_venue_pagination_layer));
-	animate_label_up_last(bitmap_layer_get_layer(s_venue_icon_layer));
+	animate_label_up_last(text_layer_get_layer(s_venue_label_layer),LABEL_NAME_Y);
+	animate_label_up_last(text_layer_get_layer(s_venue_pagination_layer),LABEL_PAGINATION_Y);
+	animate_label_up_last(bitmap_layer_get_layer(s_venue_icon_layer),LABEL_ICON_Y);
 }
 
 void timer_callback_down(void *data) {
 	update_venue_layers(s_active_venue);
-	animate_label_down_last(text_layer_get_layer(s_venue_label_layer));
-	animate_label_down_last(text_layer_get_layer(s_venue_pagination_layer));
-	animate_label_down_last(bitmap_layer_get_layer(s_venue_icon_layer));
+	animate_label_down_last(text_layer_get_layer(s_venue_label_layer),LABEL_NAME_Y);
+	animate_label_down_last(text_layer_get_layer(s_venue_pagination_layer),LABEL_PAGINATION_Y);
+	animate_label_down_last(bitmap_layer_get_layer(s_venue_icon_layer),LABEL_ICON_Y);
 }
 	
 static void venue_select_up_handler(ClickRecognizerRef recognizer, void *context) {
@@ -898,6 +900,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
 				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
 				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
+				items_icons[i-1] = dict_find(iter,i+20)->value->int32;
+				items_cat[i-1] = dict_find(iter,i+30)->value->int32;
 			}
 			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
 			#ifdef PBL_PLATFORM_APLITE

@@ -112,10 +112,14 @@ function pickItem(object_id,location_id) {
 				for (i = 1; i <= length; i++) { 
 					dictionary["ITEM_" + i + "_ID"] = response.data.objects[i-1].id;
 					dictionary["ITEM_" + i + "_NAME"] = response.data.objects[i-1].object_type.name;
+					dictionary["ITEM_" + i + "_ICON"] = response.data.objects[i-1].object_type.index;
+					dictionary["ITEM_" + i + "_CAT"] = response.data.objects[i-1].object_category.index;
 				}			
 				for (i = length + 1; i <= slots; i++) { 
 					dictionary["ITEM_" + i + "_ID"] = 0;
 					dictionary["ITEM_" + i + "_NAME"] = "empty";
+					dictionary["ITEM_" + i + "_ICON"] = 0;
+					dictionary["ITEM_" + i + "_CAT"] = -1;
 				}				
 				Pebble.sendAppMessage(dictionary);
 				
