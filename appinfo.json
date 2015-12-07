@@ -46,7 +46,9 @@
         "ITEM_9_ICON": 29,
         "ITEM_9_ID": 9,
         "ITEM_9_NAME": 19,
-        "LOCATION_ICON": 204
+        "LOCATION_ICON": 204,
+        "NAME_ITEM": 205,
+        "NAME_LOCATION": 206
     },
     "capabilities": [
         "location"
@@ -57,113 +59,8 @@
     "resources": {
         "media": [
             {
-                "file": "images/card.png",
-                "name": "CARD",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/004_wood.png",
-                "name": "ITEM004",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/003_stone.png",
-                "name": "ITEM003",
-                "type": "png"
-            },
-            {
-                "file": "images/002_water.png",
-                "name": "ITEM002",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/001_land.png",
-                "name": "ITEM001",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/legendary_item.png",
-                "name": "LEGEND",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/epic_item.png",
-                "name": "EPIC",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/rare_item.png",
-                "name": "RARE",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/common_item.png",
-                "name": "COMMON",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
                 "file": "images/warning.png",
                 "name": "WARNING",
-                "type": "png"
-            },
-            {
-                "file": "images/mistery.png",
-                "name": "MISTERY",
-                "type": "png"
-            },
-            {
-                "file": "images/pick.png",
-                "name": "PICK",
-                "type": "png"
-            },
-            {
-                "file": "images/cross.png",
-                "name": "CROSS",
-                "type": "png"
-            },
-            {
-                "file": "images/tick.png",
-                "name": "TICK",
                 "type": "png"
             },
             {
@@ -237,14 +134,49 @@
                 "type": "png"
             },
             {
+                "file": "images/tick.png",
+                "name": "TICK",
+                "type": "png"
+            },
+            {
+                "file": "images/rare_item.png",
+                "name": "RARE",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/pick.png",
+                "name": "PICK",
+                "type": "png"
+            },
+            {
                 "file": "images/music_icon_ellipsis.png",
                 "name": "ELLIPSIS",
+                "type": "png"
+            },
+            {
+                "file": "images/mistery.png",
+                "name": "MISTERY",
                 "type": "png"
             },
             {
                 "file": "images/logoFSQ.png",
                 "name": "logoFSQ",
                 "type": "png-trans"
+            },
+            {
+                "file": "images/legendary_item.png",
+                "name": "LEGEND",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
             },
             {
                 "file": "images/icon_up",
@@ -257,8 +189,78 @@
                 "type": "png"
             },
             {
+                "file": "images/epic_item.png",
+                "name": "EPIC",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/cross.png",
+                "name": "CROSS",
+                "type": "png"
+            },
+            {
+                "file": "images/common_item.png",
+                "name": "COMMON",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/card.png",
+                "name": "CARD",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
                 "file": "images/arrows.png",
                 "name": "ARROWS",
+                "type": "png"
+            },
+            {
+                "file": "images/004_wood.png",
+                "name": "ITEM004",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/003_stone.png",
+                "name": "ITEM003",
+                "type": "png"
+            },
+            {
+                "file": "images/002_water.png",
+                "name": "ITEM002",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "png"
+            },
+            {
+                "file": "images/001_land.png",
+                "name": "ITEM001",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
                 "type": "png"
             }
         ]

@@ -10,6 +10,8 @@
 #define ID_ITEM    		202
 #define ID_LOCATION  	203
 #define LOCATION_ICON 204
+#define NAME_ITEM     205
+#define NAME_LOCATION 206
 #define	ITEM_1_ID			1
 #define	ITEM_1_NAME		11
 #define	ITEM_1_ICON		21
@@ -134,10 +136,8 @@
 
 // Types of actions
 typedef enum {
- 
 	ActionTypeFetchVenues,
 	ActionTypeShowInventory
-
 } ActionType;
 
 // Struct with data about a menu action
@@ -147,24 +147,30 @@ typedef struct {
   char* name;
 } Context;
 
+// Venue List
+struct VenueData {
+  char name[MAX_STRING_SIZE];
+  char id[MAX_STRING_SIZE];
+  int icon;
+} VenueList [MAX_ITEMS];
+static int s_venue_length;
+static int s_active_venue_idx;
+static char s_active_venue_id[MAX_STRING_SIZE];
 
-char venues_names[MAX_ITEMS][MAX_STRING_SIZE]; 
-char venues_ids[MAX_ITEMS][MAX_STRING_SIZE]; 
-int venues_icons[MAX_ITEMS]; 
-
-
-
-char items_names[MAX_ITEMS][MAX_STRING_SIZE]; 
-char items_ids[MAX_ITEMS][MAX_STRING_SIZE]; 
-int items_icons[MAX_ITEMS]; 
-int items_cat[MAX_ITEMS]; 
+// Item List
+struct ItemData {
+  char name[MAX_STRING_SIZE];
+  char id[MAX_STRING_SIZE];
+  int icon;
+  int category;
+} ItemList[MAX_ITEMS];
+static int s_item_length;
+static int s_active_item_idx;
 
 // Main window variables
 static Window *s_main_window;
 static TextLayer *s_main_label_layer;
 static ActionBarLayer *s_main_action_bar;
-
-
 
 static ActionMenu *s_main_action_menu;
 static ActionMenuLevel *s_main_root_level, *s_main_inventory_level, *s_main_venues_level;
@@ -176,9 +182,6 @@ static TextLayer *s_venue_label_layer;
 static ActionBarLayer *s_venue_action_bar;
 static BitmapLayer *s_venue_icon_layer;
 static TextLayer *s_venue_pagination_layer;
-
-
-
 
 static ActionMenu *s_venue_action_menu;
 static ActionMenuLevel *s_venue_root_level, *s_venue_inventory_level, *s_venue_items_level;
@@ -193,7 +196,6 @@ static BitmapLayer *s_item_cat_layer;
 static BitmapLayer *s_card_layer;
 static TextLayer *s_item_pagination_layer;
 
-
 static ActionMenu *s_item_action_menu;
 static ActionMenuLevel *s_item_root_level, *s_item_inventory_level, *s_item_items_level;
 static Context *s_item_action_data;
@@ -202,11 +204,6 @@ static Context *s_item_action_data;
 static GBitmap *s_ellipsis_bitmap, *s_up_bitmap, *s_down_bitmap, *s_logoFSQ_bitmap, *s_icon_bitmap, *s_cat_bitmap, *s_item_icon_bitmap, *s_card_bitmap;
 static BitmapLayer *s_logoFSQ_layer;
 static bool LOGGED_IN = false;
-static int s_active_venue;
-static int s_active_item;
-static int s_venue_length;
-static int s_item_length;
-static char current_location[MAX_STRING_SIZE];
 char* message;
 
 static bool on_animation;
@@ -285,13 +282,19 @@ static void request_items(char* id_venue) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Ítems solicitados"); 
 }
 
-static void pick_item(char* id_item, char* id_location) {
+static void pick_item(char* id_item, char* name_item, char* id_location, char* name_location) {
 		DictionaryIterator *iter;
 		app_message_outbox_begin(&iter);
 		// Add a key-value pair
+    APP_LOG(APP_LOG_LEVEL_INFO, id_item);
+    APP_LOG(APP_LOG_LEVEL_INFO, name_item);
+    APP_LOG(APP_LOG_LEVEL_INFO, id_location);
+    APP_LOG(APP_LOG_LEVEL_INFO, name_location);
 		dict_write_uint8(iter, FETCH_TYPE, 2); // 2 es coger objetos
   	dict_write_cstring(iter, ID_ITEM, id_item); 
 		dict_write_cstring(iter, ID_LOCATION, id_location); 
+  	dict_write_cstring(iter, NAME_ITEM, name_item); 
+		dict_write_cstring(iter, NAME_LOCATION, name_location); 
 		// Send the message!
 		app_message_outbox_send();
 		APP_LOG(APP_LOG_LEVEL_INFO, "Coger objeto"); 
@@ -322,7 +325,7 @@ static void s_dialog_select_down_handler(ClickRecognizerRef recognizer, void *co
 }
 
 static void s_dialog_select_up_handler(ClickRecognizerRef recognizer, void *context) {
-	pick_item(items_ids[s_active_item], current_location);
+	pick_item(ItemList[s_active_item_idx].id, ItemList[s_active_item_idx].name, s_active_venue_id, VenueList[s_active_venue_idx].name);
 }
 
 static void s_dialog_click_config_provider(void *context) {
@@ -428,14 +431,14 @@ void animate_label_down_last(Layer *l, int y) {
 
 static void update_venue_layers (int id) {
 	static char pagination[] = "10/10";
-	snprintf(pagination, sizeof(pagination), "%d/%d", s_active_venue+1, s_venue_length);
-	text_layer_set_text(s_venue_label_layer, venues_names[id]);
+	snprintf(pagination, sizeof(pagination), "%d/%d", s_active_venue_idx+1, s_venue_length);
+	text_layer_set_text(s_venue_label_layer, VenueList[id].name);
 	text_layer_set_text(s_venue_pagination_layer, pagination);
 	
 	gbitmap_destroy(s_icon_bitmap);
 	
 	//int question=rand()%7;
-	switch(venues_icons[id])
+	switch(VenueList[id].icon)
 	{
 		case -1:
 		s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_MISTERY);
@@ -468,11 +471,11 @@ static void update_venue_layers (int id) {
 
 static void update_item_layers (int id) {
 	static char pagination[] = "10/10";
-	snprintf(pagination, sizeof(pagination), "%d/%d", s_active_item+1, s_item_length);
-	text_layer_set_text(s_item_label_layer, items_names[id]);
+	snprintf(pagination, sizeof(pagination), "%d/%d", s_active_item_idx+1, s_item_length);
+	text_layer_set_text(s_item_label_layer, ItemList[id].name);
 	text_layer_set_text(s_item_pagination_layer, pagination);
 	gbitmap_destroy(s_cat_bitmap);
-	switch(items_cat[id])
+	switch(ItemList[id].category)
 	{
 	
 		case 1:
@@ -496,11 +499,11 @@ static void update_item_layers (int id) {
 	bitmap_layer_set_bitmap(s_item_cat_layer, s_cat_bitmap);
 	
 	
-	APP_LOG(APP_LOG_LEVEL_INFO, "Icono item: %d", items_icons[id]);
+	APP_LOG(APP_LOG_LEVEL_INFO, "Icono item: %d", ItemList[id].icon);
 	
 	gbitmap_destroy(s_item_icon_bitmap);
 	s_item_icon_bitmap = NULL;
-	switch(items_icons[id])
+	switch(ItemList[id].icon)
 	{
 	
 		case 1:
@@ -533,7 +536,7 @@ static void item_select_click_handler(ClickRecognizerRef recognizer, void *conte
 
 
 void timer2_callback_up(void *data) {
-	update_item_layers(s_active_item);
+	update_item_layers(s_active_item_idx);
 	animate_label_up_last(text_layer_get_layer(s_item_label_layer),LABEL_NAME_Y);
 	animate_label_up_last(text_layer_get_layer(s_item_pagination_layer),LABEL_PAGINATION_Y);
 	animate_label_up_last(bitmap_layer_get_layer(s_item_cat_layer),LABEL_CAT_Y);
@@ -541,7 +544,7 @@ void timer2_callback_up(void *data) {
 
 }
 void timer2_callback_down(void *data) {
-	update_item_layers(s_active_item);
+	update_item_layers(s_active_item_idx);
 	animate_label_down_last(text_layer_get_layer(s_item_label_layer),LABEL_NAME_Y);
 	animate_label_down_last(text_layer_get_layer(s_item_pagination_layer),LABEL_PAGINATION_Y);
 	animate_label_down_last(bitmap_layer_get_layer(s_item_cat_layer),LABEL_CAT_Y);
@@ -553,14 +556,14 @@ void timer3_callback(void *data) {
 	
 static void item_select_up_handler(ClickRecognizerRef recognizer, void *context) {
 	if (on_animation == false) {
-		if ((s_active_item>=1)) {
+		if ((s_active_item_idx>=1)) {
 			on_animation = true;
 			timer3 = app_timer_register(ANIM_DURATION * 2, (AppTimerCallback) timer3_callback, NULL);
 			animate_label_up_first(text_layer_get_layer(s_item_label_layer));
 			animate_label_up_first(text_layer_get_layer(s_item_pagination_layer));
 			animate_label_up_first(bitmap_layer_get_layer(s_item_cat_layer));
 			animate_label_up_first(bitmap_layer_get_layer(s_item_icon_layer));
-			s_active_item=s_active_item-1;
+			s_active_item_idx=s_active_item_idx-1;
 			timer = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer2_callback_up, NULL);
 		}
 	}
@@ -568,14 +571,14 @@ static void item_select_up_handler(ClickRecognizerRef recognizer, void *context)
 
 static void item_select_down_handler(ClickRecognizerRef recognizer, void *context) {
 	if (on_animation == false) {
-		if (s_active_item<(s_item_length-1)) {
+		if (s_active_item_idx<(s_item_length-1)) {
 			on_animation = true;
 			timer3 = app_timer_register(ANIM_DURATION * 2, (AppTimerCallback) timer3_callback, NULL);
 			animate_label_down_first(text_layer_get_layer(s_item_label_layer));
 			animate_label_down_first(text_layer_get_layer(s_item_pagination_layer));
 			animate_label_down_first(bitmap_layer_get_layer(s_item_cat_layer));
 			animate_label_down_first(bitmap_layer_get_layer(s_item_icon_layer));
-			s_active_item=s_active_item+1;
+			s_active_item_idx=s_active_item_idx+1;
 			timer2 = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer2_callback_down, NULL);
 		}
 	}
@@ -673,18 +676,18 @@ static void item_window_unload(Window *window) {
 /******************************** Venue  Clicks ********************************/
 
 static void venue_select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  request_items(venues_ids[s_active_venue]);
+  request_items(VenueList[s_active_venue_idx].id);
 }
 
 void timer_callback_up(void *data) {
-	update_venue_layers(s_active_venue);
+	update_venue_layers(s_active_venue_idx);
 	animate_label_up_last(text_layer_get_layer(s_venue_label_layer),LABEL_NAME_Y);
 	animate_label_up_last(text_layer_get_layer(s_venue_pagination_layer),LABEL_PAGINATION_Y);
 	animate_label_up_last(bitmap_layer_get_layer(s_venue_icon_layer),LABEL_ICON_Y);
 }
 
 void timer_callback_down(void *data) {
-	update_venue_layers(s_active_venue);
+	update_venue_layers(s_active_venue_idx);
 	animate_label_down_last(text_layer_get_layer(s_venue_label_layer),LABEL_NAME_Y);
 	animate_label_down_last(text_layer_get_layer(s_venue_pagination_layer),LABEL_PAGINATION_Y);
 	animate_label_down_last(bitmap_layer_get_layer(s_venue_icon_layer),LABEL_ICON_Y);
@@ -692,13 +695,13 @@ void timer_callback_down(void *data) {
 	
 static void venue_select_up_handler(ClickRecognizerRef recognizer, void *context) {
 	if (on_animation == false) {
-		if (s_active_venue>=1) {
+		if (s_active_venue_idx>=1) {
 			on_animation = true;
 			timer3 = app_timer_register(ANIM_DURATION * 2, (AppTimerCallback) timer3_callback, NULL);
 			animate_label_up_first(text_layer_get_layer(s_venue_label_layer));
 			animate_label_up_first(text_layer_get_layer(s_venue_pagination_layer));
 			animate_label_up_first(bitmap_layer_get_layer(s_venue_icon_layer));
-			s_active_venue=s_active_venue-1;
+			s_active_venue_idx=s_active_venue_idx-1;
 			timer = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer_callback_up, NULL);	
 		}
 	}
@@ -707,13 +710,13 @@ static void venue_select_up_handler(ClickRecognizerRef recognizer, void *context
 
 static void venue_select_down_handler(ClickRecognizerRef recognizer, void *context) {
 	if (on_animation == false) {
-		if (s_active_venue<(s_venue_length-1)) {
+		if (s_active_venue_idx<(s_venue_length-1)) {
 			on_animation = true;
 			timer3 = app_timer_register(ANIM_DURATION * 2, (AppTimerCallback) timer3_callback, NULL);
 			animate_label_down_first(text_layer_get_layer(s_venue_label_layer));
 			animate_label_down_first(text_layer_get_layer(s_venue_pagination_layer));
 			animate_label_down_first(bitmap_layer_get_layer(s_venue_icon_layer));
-			s_active_venue=s_active_venue+1;
+			s_active_venue_idx=s_active_venue_idx+1;
 			timer = app_timer_register(ANIM_DURATION, (AppTimerCallback) timer_callback_down, NULL);
 		}
 	}
@@ -896,26 +899,16 @@ static void main_window_unload(Window *window) {
 
 
 /********************************* Messages and received handlers ***********************************/
-
 static void in_received_handler(DictionaryIterator *iter, void *context) 
 {
-	
-	
 	APP_LOG(APP_LOG_LEVEL_INFO, "Received handler"); 
-	
-	
 
-	
-	
-	Tuple *length_tuple = dict_find(iter,DATA_LENGTH);
+  Tuple *length_tuple = dict_find(iter,DATA_LENGTH);
 	int length = length_tuple->value->int32;
 	bool unlock = false;
 	Tuple *type_tuple = dict_find(iter,DATA_TYPE);
 	
-	//APP_LOG(APP_LOG_LEVEL_INFO, "Tipo de datos recibidos: %i", type_tuple->value->int32); 
-
 	switch (type_tuple->value->int32) {
-		
 		case 0:
 			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Login exitoso"); 
@@ -929,89 +922,82 @@ static void in_received_handler(DictionaryIterator *iter, void *context)
 			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidas las venues en el Pebble"); 
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de las venues
-				strcpy(venues_ids[i-1], dict_find(iter,i)->value->cstring);
-				strcpy(venues_names[i-1], dict_find(iter,i+10)->value->cstring);	
-				venues_icons[i-1] = dict_find(iter,i+20)->value->int32;			
+        strcpy(VenueList[i-1].id, dict_find(iter,i)->value->cstring);
+        strcpy(VenueList[i-1].name, dict_find(iter,i+10)->value->cstring);
+        VenueList[i-1].icon = dict_find(iter,i+20)->value->int32;
 			}
 			action_menu_unfreeze(s_main_action_menu);
 			#ifdef PBL_PLATFORM_APLITE
 				window_set_fullscreen(s_venue_window, true);
 			#endif
 			window_stack_push(s_venue_window, true);
-			s_active_venue=0;
+			s_active_venue_idx=0;
 		  s_venue_length=length;
-			update_venue_layers(s_active_venue);
+			update_venue_layers(s_active_venue_idx);
 		break;
 		
 		case 2:  
 			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recibidos los items en el Pebble"); 	
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
-				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
-				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
-				items_icons[i-1] = dict_find(iter,i+20)->value->int32;
-				items_cat[i-1] = dict_find(iter,i+30)->value->int32;
+				strcpy(ItemList[i-1].id, dict_find(iter,i)->value->cstring);
+				strcpy(ItemList[i-1].name, dict_find(iter,i+10)->value->cstring);	
+				ItemList[i-1].icon = dict_find(iter,i+20)->value->int32;
+				ItemList[i-1].category = dict_find(iter,i+30)->value->int32;
 			}
-			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
-			if (venues_icons[s_active_venue]==-1) unlock = true;
-	  	venues_icons[s_active_venue]=dict_find(iter,LOCATION_ICON)->value->int32; //por si cambia el icono (al desbloquear sitios)
+			strcpy(s_active_venue_id, dict_find(iter,ID_LOCATION)->value->cstring);	
+			if (VenueList[s_active_venue_idx].icon==-1) unlock = true;
+	  	VenueList[s_active_venue_idx].icon=dict_find(iter,LOCATION_ICON)->value->int32; //por si cambia el icono (al desbloquear sitios)
 			#ifdef PBL_PLATFORM_APLITE
 				window_set_fullscreen(s_item_window, true);
 			#endif
 			window_stack_push(s_item_window, true);
-			s_active_item=0;
+			s_active_item_idx=0;
   		s_item_length=length;
-			update_item_layers(s_active_item);
-			update_venue_layers(s_active_venue);
-	  	if (unlock) dialog_message_window_push(concat("You have unlocked ", venues_names[s_active_venue]));
-		
-	
+			update_item_layers(s_active_item_idx);
+			update_venue_layers(s_active_venue_idx);
+	  	if (unlock) dialog_message_window_push(concat("You have unlocked ", VenueList[s_active_venue_idx].name));
 		break;
 		
 		case 3:    	
 			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recogido un objeto"); 			
-			dialog_message_window_push(concat("You have picked ", items_names[s_active_item]));
+			dialog_message_window_push(concat("You have picked ", ItemList[s_active_item_idx].name));
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
-				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
-				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
-				items_icons[i-1] = dict_find(iter,i+20)->value->int32;
-				items_cat[i-1] = dict_find(iter,i+30)->value->int32;
+				strcpy(ItemList[i-1].id, dict_find(iter,i)->value->cstring);
+				strcpy(ItemList[i-1].name, dict_find(iter,i+10)->value->cstring);	
+				ItemList[i-1].icon = dict_find(iter,i+20)->value->int32;
+				ItemList[i-1].category = dict_find(iter,i+30)->value->int32;
 			}
-			strcpy(current_location, dict_find(iter,ID_LOCATION)->value->cstring);	
+			strcpy(s_active_venue_id, dict_find(iter,ID_LOCATION)->value->cstring);	
 			#ifdef PBL_PLATFORM_APLITE
 				window_set_fullscreen(s_item_window, true);
 			#endif
 		  window_stack_remove(s_dialog_main_window, true);
-			s_active_item=0;
+			s_active_item_idx=0;
   		s_item_length=length;
-			update_item_layers(s_active_item);
+			update_item_layers(s_active_item_idx);
 		break;
-		
 		
 		case 4:    	
 			vibes_short_pulse();
 			APP_LOG(APP_LOG_LEVEL_INFO, "Recogido inventario"); 			
 			for (int i = 1; i <= (length); i ++) {  //rellenamos los nombres de los items
-				strcpy(items_ids[i-1], dict_find(iter,i)->value->cstring);
-				strcpy(items_names[i-1], dict_find(iter,i+10)->value->cstring);	
-				items_icons[i-1] = dict_find(iter,i+20)->value->int32;
-			  items_cat[i-1] = dict_find(iter,i+30)->value->int32;
+				strcpy(ItemList[i-1].id, dict_find(iter,i)->value->cstring);
+				strcpy(ItemList[i-1].name, dict_find(iter,i+10)->value->cstring);	
+				ItemList[i-1].icon = dict_find(iter,i+20)->value->int32;
+			  ItemList[i-1].category = dict_find(iter,i+30)->value->int32;
 				#ifdef PBL_PLATFORM_APLITE
 					window_set_fullscreen(s_item_window, true);
 				#endif
 				window_stack_push(s_item_window, true);
-				s_active_item=0;
+				s_active_item_idx=0;
 				s_item_length=length;
-				update_item_layers(s_active_item);
+				update_item_layers(s_active_item_idx);
 			}
 		break;
-
 	}
-	
-	
 }
-
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
