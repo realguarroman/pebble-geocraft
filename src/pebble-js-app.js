@@ -65,12 +65,14 @@ function fetchItems(venue_id) {
 					dictionary["ITEM_" + i + "_NAME"] = response.data.objects[i-1].object_type.name;
 					dictionary["ITEM_" + i + "_ICON"] = response.data.objects[i-1].object_type.index;
 					dictionary["ITEM_" + i + "_CAT"] = response.data.objects[i-1].object_category.index;
+					dictionary["ITEM_" + i + "_COUNT"] = 1;
 				}			
 				for (i = length + 1; i <= slots; i++) { 
 					dictionary["ITEM_" + i + "_ID"] = 0;
 					dictionary["ITEM_" + i + "_NAME"] = "empty";
 					dictionary["ITEM_" + i + "_ICON"] = 0;
 					dictionary["ITEM_" + i + "_CAT"] = -1;
+					dictionary["ITEM_" + i + "_COUNT"] = 0;
 				}				
 				Pebble.sendAppMessage(dictionary);
       } else {
@@ -162,7 +164,8 @@ function inventory() {
 				};			
 				var i;
 				for (i = 1; i <= length; i++) { 
-					dictionary["ITEM_" + i + "_ID"] = response.data.visibleByTheUser.objects[i-1].id;
+				//	dictionary["ITEM_" + i + "_ID"] = response.data.visibleByTheUser.objects[i-1].id;
+					dictionary["ITEM_" + i + "_COUNT"] = response.data.visibleByTheUser.objects[i-1].count;
 					dictionary["ITEM_" + i + "_NAME"] = response.data.visibleByTheUser.objects[i-1].object_type.name;
 					dictionary["ITEM_" + i + "_ICON"] = response.data.visibleByTheUser.objects[i-1].object_type.index;
 					dictionary["ITEM_" + i + "_CAT"] = response.data.visibleByTheUser.objects[i-1].object_category.index;

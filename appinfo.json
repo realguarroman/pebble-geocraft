@@ -7,42 +7,52 @@
         "ID_LOCATION": 203,
         "ID_VENUE": 201,
         "ITEM_10_CAT": 40,
+        "ITEM_10_COUNT": 50,
         "ITEM_10_ICON": 30,
         "ITEM_10_ID": 10,
         "ITEM_10_NAME": 20,
         "ITEM_1_CAT": 31,
+        "ITEM_1_COUNT": 41,
         "ITEM_1_ICON": 21,
         "ITEM_1_ID": 1,
         "ITEM_1_NAME": 11,
         "ITEM_2_CAT": 32,
+        "ITEM_2_COUNT": 42,
         "ITEM_2_ICON": 22,
         "ITEM_2_ID": 2,
         "ITEM_2_NAME": 12,
         "ITEM_3_CAT": 33,
+        "ITEM_3_COUNT": 43,
         "ITEM_3_ICON": 23,
         "ITEM_3_ID": 3,
         "ITEM_3_NAME": 13,
         "ITEM_4_CAT": 34,
+        "ITEM_4_COUNT": 44,
         "ITEM_4_ICON": 24,
         "ITEM_4_ID": 4,
         "ITEM_4_NAME": 14,
         "ITEM_5_CAT": 35,
+        "ITEM_5_COUNT": 45,
         "ITEM_5_ICON": 25,
         "ITEM_5_ID": 5,
         "ITEM_5_NAME": 15,
         "ITEM_6_CAT": 36,
+        "ITEM_6_COUNT": 46,
         "ITEM_6_ICON": 26,
         "ITEM_6_ID": 6,
         "ITEM_6_NAME": 16,
         "ITEM_7_CAT": 37,
+        "ITEM_7_COUNT": 47,
         "ITEM_7_ICON": 27,
         "ITEM_7_ID": 7,
         "ITEM_7_NAME": 17,
         "ITEM_8_CAT": 38,
+        "ITEM_8_COUNT": 48,
         "ITEM_8_ICON": 28,
         "ITEM_8_ID": 8,
         "ITEM_8_NAME": 18,
         "ITEM_9_CAT": 39,
+        "ITEM_9_COUNT": 49,
         "ITEM_9_ICON": 29,
         "ITEM_9_ID": 9,
         "ITEM_9_NAME": 19,
@@ -57,6 +67,116 @@
     "resources": {
         "media": [
             {
+                "file": "images/015_fire.pxi",
+                "name": "ITEM015",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/014_mushroom.png",
+                "name": "ITEM014",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/013_rotten_wood.png",
+                "name": "ITEM013",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/012_spark.png",
+                "name": "ITEM012",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/011_cement.png",
+                "name": "ITEM011",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/009_temple.png",
+                "name": "ITEM009",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/008_desert.png",
+                "name": "ITEM008",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/010_pyramid.png",
+                "name": "ITEM010",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/006_sand.png",
+                "name": "ITEM006",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/005_mud.png",
+                "name": "ITEM005",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/007_stone_spear.png",
+                "name": "ITEM007",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
                 "file": "images/card.png",
                 "name": "CARD",
                 "targetPlatforms": [
@@ -64,7 +184,7 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/004_wood.png",
@@ -74,12 +194,12 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/003_stone.png",
                 "name": "ITEM003",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/002_water.png",
@@ -89,17 +209,7 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
-            },
-            {
-                "file": "images/001_land.png",
-                "name": "ITEM001",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/legendary_item.png",
@@ -109,7 +219,7 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/epic_item.png",
@@ -119,7 +229,7 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/rare_item.png",
@@ -129,7 +239,7 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/common_item.png",
@@ -139,32 +249,22 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
-            },
-            {
-                "file": "images/warning.png",
-                "name": "WARNING",
-                "type": "png"
-            },
-            {
-                "file": "images/mistery.png",
-                "name": "MISTERY",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/pick.png",
                 "name": "PICK",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/cross.png",
                 "name": "CROSS",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/tick.png",
                 "name": "TICK",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/venue6.png",
@@ -174,57 +274,7 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
-            },
-            {
-                "file": "images/venue5.png",
-                "name": "VENUE5",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/venue4.png",
-                "name": "VENUE4",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/venue3.png",
-                "name": "VENUE3",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/venue2.png",
-                "name": "VENUE2",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
-            },
-            {
-                "file": "images/venue1.png",
-                "name": "VENUE1",
-                "targetPlatforms": [
-                    "aplite",
-                    "basalt",
-                    "chalk"
-                ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/venue0.png",
@@ -234,32 +284,112 @@
                     "basalt",
                     "chalk"
                 ],
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/music_icon_ellipsis.png",
                 "name": "ELLIPSIS",
-                "type": "png"
+                "type": "bitmap"
+            },
+            {
+                "file": "images/venue5.png",
+                "name": "VENUE5",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/venue4.png",
+                "name": "VENUE4",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/venue3.png",
+                "name": "VENUE3",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/venue2.png",
+                "name": "VENUE2",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/venue1.png",
+                "name": "VENUE1",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/icon_up",
+                "name": "ICON_UP",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/icon_down",
+                "name": "ICON_DOWN",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/arrows.png",
+                "name": "ARROWS",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/combinar.png",
+                "name": "MIXCARD",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/001_land.png",
+                "name": "ITEM001",
+                "targetPlatforms": [
+                    "aplite",
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/warning.png",
+                "name": "WARNING",
+                "type": "bitmap"
+            },
+            {
+                "file": "images/mistery.png",
+                "name": "MISTERY",
+                "type": "bitmap"
             },
             {
                 "file": "images/logoFSQ.png",
                 "name": "logoFSQ",
                 "type": "png-trans"
-            },
-            {
-                "file": "images/icon_up",
-                "name": "ICON_UP",
-                "type": "png"
-            },
-            {
-                "file": "images/icon_down",
-                "name": "ICON_DOWN",
-                "type": "png"
-            },
-            {
-                "file": "images/arrows.png",
-                "name": "ARROWS",
-                "type": "png"
             }
         ]
     },
